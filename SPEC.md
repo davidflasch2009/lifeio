@@ -314,6 +314,12 @@ Erst die App, dann das Design.
   Vorderklappe (Reiter-Breite passt sich der Beschriftung an; Gelernt/Unsortiert mit gemessenen Farben, eigene
   Ordner mit abgeleiteten Tönen). Spross als freigestelltes Bild aus dem Mockup (`sprout.png`). Suchleiste als
   klare Glasröhre. Animationen feiner: weniger Weg, kein starkes Überschwingen, weniger Partikel.
+- **v1.5 – iPhone-Feinschliff:** kein dunkler Balken mehr unter der Tab-Leiste (Hintergrund reicht über den
+  Home-Leisten-Bereich, Seitenfarbe passt zum Design). Nach einem geöffneten Ordner schließt der nächste direkt an.
+  Alle Popups (Erfassen, Logbuch, Ordner, Dialoge) erscheinen zentriert und bleiben über der Tastatur.
+  Aufgeklappte Karte neu gestaltet: Ordner-Pill + „Umbenennen“ (Popup), Aktions-Kacheln mit Icons
+  (Pausieren, Gelernt, Zu Ideen, Verwerfen bzw. großes „Jetzt lernen“/„Weiterlernen“/„Nochmal lernen“),
+  linierter Notizzettel, Logbuch als leuchtende Zeitleiste.
 - Bei „Bewegung reduzieren“ im System stehen alle Animationen still.
 
 ---
