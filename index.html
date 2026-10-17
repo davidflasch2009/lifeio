@@ -546,17 +546,27 @@ input[type="date"].input { min-height: 46px; }
 }
 
 /* Leerer Start-Screen – Maße wie im Mockup */
-.empty-state { position: relative; text-align: center; padding-top: 104px; }
-.empty-state .sprout {
+.empty-state { position: relative; text-align: center; padding-top: 98px; }
+.sprout-wrap { position: relative; width: 192px; height: 160px; margin: -5px auto 0; translate: 2px 0; transform-origin: 50% 98%; }
+.sprout-img {
   position: relative;
-  width: 180px; height: 150px;
-  margin: 0 auto;
-  translate: -4px 0;
-  filter: drop-shadow(0 0 18px rgba(150, 255, 170, .35)) drop-shadow(0 6px 6px rgba(0, 30, 20, .35));
-  animation: floaty 6s ease-in-out infinite;
+  display: block;
+  width: 100%; height: 100%;
+  transform-origin: 52% 98%;
+  filter: drop-shadow(0 0 16px rgba(150, 255, 170, .26));
+  animation: sway 6.5s ease-in-out infinite;
 }
-.empty-state p { position: relative; margin: 26px 0 0; font-size: 23px; line-height: 26px; font-weight: 400; letter-spacing: -.01em; color: var(--text); }
-.empty-state .btn { position: relative; margin-top: 19px; width: 291px; max-width: 100%; height: 61px; font-size: 21px; font-weight: 700; gap: 10px; }
+.sprout-shadow {
+  position: absolute;
+  left: 50%; bottom: -5px;
+  width: 92px; height: 15px;
+  margin-left: -40px;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(0, 15, 10, .62), rgba(0, 15, 10, 0));
+}
+.sprout-wrap > .spark { z-index: 1; }
+.empty-state p { position: relative; margin: 20px 0 0; font-size: 23px; line-height: 26px; font-weight: 400; letter-spacing: -.01em; color: var(--text); }
+.empty-state .btn { position: relative; margin-top: 26px; width: 291px; max-width: 100%; height: 61px; font-size: 21px; font-weight: 700; gap: 10px; }
 .empty-state .btn svg { width: 34px; height: 34px; }
 .empty-state .specks { position: absolute; inset: 0; pointer-events: none; }
 .empty-small { color: var(--text-dim); text-align: center; padding: 20px 0; margin: 0; }
@@ -652,15 +662,20 @@ textarea.notes-edit { min-height: 92px; display: block; }
 .search .input {
   height: 47px;
   padding-left: 62px;
-  --glass-hi: rgba(235, 250, 255, .5);
-  --glass-tint: rgba(205, 235, 248, .3);
+  background:
+    radial-gradient(45% 3px at 40% 3px, rgba(255, 255, 255, .95), transparent),
+    linear-gradient(180deg, rgba(255, 255, 255, .42) 0%, rgba(255, 255, 255, .17) 40%, rgba(255, 255, 255, .1) 62%, rgba(255, 255, 255, .2) 100%);
+  border: 1.5px solid rgba(225, 248, 255, .72);
+  box-shadow: inset 0 2px 1px rgba(255, 255, 255, .4), inset 0 -3px 7px rgba(0, 20, 40, .25), inset 0 0 14px rgba(255, 255, 255, .06), 0 4px 14px rgba(0, 15, 35, .35);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
   padding-right: 42px;
   border-radius: 999px;
   font-size: 17px;
   color: var(--text);
   text-shadow: var(--text-shadow);
 }
-.search .input::placeholder { color: var(--placeholder); text-shadow: var(--text-shadow); }
+.search .input::placeholder { color: rgba(245, 252, 255, .95); text-shadow: var(--text-shadow); }
 .search .input:focus { border-color: rgba(160, 235, 255, .95); }
 .search .ico {
   position: absolute;
@@ -684,110 +699,102 @@ textarea.notes-edit { min-height: 92px; display: block; }
 }
 .search input::-webkit-search-cancel-button { display: none; }
 
-.cabinet { padding: 0 0 8px; margin: 0 -1px; }
+.cabinet { padding: 0 0 8px; }
+/* Ordner wie im Mockup: Rückwand mit Reiter (SVG, S-Kurven-Flanken) + glänzende Vorderklappe */
 .folder {
-  --fc: #8fa6b8;
+  --fc: #7d9cb8;
   --fc-fg: #fff;
-  --fc-ts: 0 1px 2px rgba(0, 0, 0, .4);
-  --fc-hi: color-mix(in srgb, var(--fc) 62%, white);
-  --fc-lo: color-mix(in srgb, var(--fc) 82%, black);
+  --fc-ts: 0 1px 2px rgba(0, 0, 0, .45);
   position: relative;
+  padding-top: 40px;
   scroll-margin-top: 20px;
 }
-.folder + .folder { margin-top: -45px; transition: margin-top .38s cubic-bezier(.2, .8, .2, 1); }
+.folder + .folder { margin-top: -55px; transition: margin-top .4s cubic-bezier(.2, .8, .2, 1); }
 /* nach einem geöffneten Ordner nicht überlappen – sonst verdeckt der nächste Reiter die letzte Karte */
 .folder.open + .folder { margin-top: 12px; }
+.folder-art {
+  position: absolute;
+  left: 0; top: 0;
+  width: 100%; height: 72px;
+  overflow: visible;
+  pointer-events: none;
+  filter: drop-shadow(0 -2px 5px rgba(0, 15, 35, .3));
+  transition: filter .3s;
+}
+.folder.open .folder-art { filter: drop-shadow(0 -3px 8px rgba(160, 230, 255, .28)) brightness(1.05); }
+@media (hover: hover) { .folder:not(.open):hover .folder-art { filter: drop-shadow(0 -3px 7px rgba(0, 15, 35, .3)) brightness(1.06); } }
 .folder-tab {
-  position: relative;
+  position: absolute;
   z-index: 1;
+  top: 0;
+  left: calc(var(--tab-frac, 0) * 100% + 30px);
+  height: 30px;
   display: flex;
-  align-items: stretch;
-  width: max-content;
-  max-width: calc(100% - var(--off) - 24px);
-  height: 36px;
-  margin-left: var(--off);
+  align-items: center;
+  white-space: nowrap;
   color: var(--fc-fg);
   text-shadow: var(--fc-ts);
-  border-radius: 9px 9px 0 0;
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, .55) 0%, rgba(255, 255, 255, .15) 55%, rgba(255, 255, 255, 0) 60%),
-    linear-gradient(180deg, var(--fc-hi), var(--fc) 70%);
-  box-shadow: inset 0 1.5px 0 rgba(255, 255, 255, .85), inset 1px 0 0 rgba(255, 255, 255, .35);
 }
-/* schräge Reiter-Flanken wie bei echten Mappen */
-.folder-tab::before, .folder-tab::after {
-  content: '';
-  position: absolute;
-  top: 0; bottom: 0;
-  width: 22px;
-  background: inherit;
-  box-shadow: inset 0 1.5px 0 rgba(255, 255, 255, .85);
-  z-index: -1;
-}
-.folder-tab::after { right: -16px; border-top-right-radius: 9px; transform: skewX(32deg); transform-origin: bottom left; }
-.folder-tab::before { left: -16px; border-top-left-radius: 9px; transform: skewX(-32deg); transform-origin: bottom right; }
-.folder.off0 .folder-tab::before { display: none; }
+.folder.off0 .folder-tab { left: 14px; }
 .folder-tab-btn {
   display: flex;
   align-items: center;
   gap: 7px;
+  height: 30px;
   min-width: 0;
-  padding: 0 4px 0 13px;
+  padding: 0 2px;
   border: 0;
+  border-radius: 10px;
   background: none;
   color: inherit;
   font-weight: 700;
-  font-size: 19px;
-  letter-spacing: -.01em;
+  font-size: 21px;
+  letter-spacing: -.015em;
 }
-.folder:not(.off0) .folder-tab-btn { padding-left: 4px; }
-.folder-tab-btn .emo { font-size: 19px; line-height: 1; filter: drop-shadow(0 1px 1px rgba(0, 0, 0, .25)); text-shadow: none; }
-.folder-tab-btn .emo svg { width: 28px; height: 28px; }
-.folder-tab-btn .name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.folder-tab-btn .emo { font-size: 20px; line-height: 1; filter: drop-shadow(0 1px 1px rgba(0, 0, 0, .3)); text-shadow: none; }
+.folder-tab-btn .emo svg { width: 27px; height: 27px; }
+.folder-tab-btn .name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 46vw; }
 .folder-tab .count {
-  min-width: 24px;
-  height: 19px;
-  line-height: 19px;
-  padding: 0 7px;
+  min-width: 27px;
+  height: 21px;
+  line-height: 21px;
+  padding: 0 8px;
   border-radius: 999px;
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 700;
   text-align: center;
   color: #fff;
-  text-shadow: none;
-  background: rgba(0, 25, 40, .42);
-  box-shadow: inset 0 1px 3px rgba(0, 0, 0, .45), 0 1px 0 rgba(255, 255, 255, .45);
+  text-shadow: 0 1px 1px rgba(0, 0, 0, .3);
+  background: rgba(0, 20, 30, .3);
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, .4), 0 1px 0 rgba(255, 255, 255, .3);
 }
-.folder-more { border: 0; background: none; color: inherit; font-weight: 800; font-size: 20px; padding: 0 6px 0 2px; }
+.folder-more { border: 0; background: none; color: inherit; font-weight: 800; font-size: 20px; padding: 0 2px 0 6px; height: 30px; }
 .folder:not(.open) .folder-more { display: none; }
 .folder-front {
   position: relative;
-  min-height: 72px;
+  min-height: 76px;
   padding: 0 8px;
-  border-radius: 0 14px 14px 14px;
+  border-radius: 13px;
+  border: 1px solid rgba(255, 255, 255, .26);
   background:
-    linear-gradient(180deg, rgba(255, 255, 255, .6) 0, rgba(255, 255, 255, .14) 3px, rgba(255, 255, 255, 0) 30px),
-    linear-gradient(180deg, color-mix(in srgb, var(--fc) 82%, #fff6a0) 0%, var(--fc) 40%, color-mix(in srgb, var(--fc) 82%, black) 100%);
-  box-shadow: inset 0 1.5px 0 rgba(255, 255, 255, .75), inset 0 -3px 8px rgba(0, 0, 0, .12), 0 -3px 10px rgba(0, 20, 40, .22), 0 8px 18px rgba(0, 20, 40, .3);
-  transition: min-height .38s cubic-bezier(.2, .8, .2, 1);
+    radial-gradient(155% 108% at 0% 0%, rgba(255, 255, 255, .34) 0%, rgba(255, 255, 255, .24) 54%, rgba(255, 255, 255, .07) 55.5%, rgba(255, 255, 255, 0) 60%),
+    linear-gradient(180deg, rgba(255, 255, 255, .5) 0, rgba(255, 255, 255, .12) 2px, rgba(255, 255, 255, 0) 16px),
+    linear-gradient(180deg, var(--f-front1) 0%, var(--f-front2) 48%, var(--f-front3) 100%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .8), inset 0 -2px 0 rgba(255, 255, 255, .14), inset 0 -12px 16px rgba(0, 25, 45, .22), 0 -3px 8px rgba(0, 20, 40, .2), 0 10px 22px rgba(0, 15, 35, .35);
+  transition: min-height .4s cubic-bezier(.2, .8, .2, 1);
 }
-.folder:not(.off0) .folder-front { border-top-left-radius: 14px; }
-/* Funkeln an der Mappenecke */
-.folder-front > .spark { --s: 18px; left: auto; right: -6px; top: -7px; animation-duration: 3.6s; }
 /* Der vorderste Ordner zeigt seine ganze Vorderseite – wie im Mockup */
-.folder.last:not(.open) .folder-front {
-  min-height: 92px;
-  background:
-    radial-gradient(140% 85% at 10% -25%, rgba(255, 255, 255, .5) 0%, rgba(255, 255, 255, .22) 62%, rgba(255, 255, 255, 0) 63%),
-    linear-gradient(180deg, rgba(255, 255, 255, .7) 0, rgba(255, 255, 255, .15) 4px, rgba(255, 255, 255, 0) 22px),
-    linear-gradient(180deg, color-mix(in srgb, var(--fc) 80%, white) 0%, var(--fc) 40%, color-mix(in srgb, var(--fc) 72%, #0a1a2a) 100%);
-}
-.folder-wrap { display: grid; grid-template-rows: 0fr; transition: grid-template-rows .38s cubic-bezier(.2, .8, .2, 1); }
+.folder.last:not(.open) .folder-front { min-height: 82px; }
+/* Funkeln an den Ecken */
+.folder > .spark { --s: 18px; left: auto; right: -7px; top: 22px; animation-duration: 3.8s; }
+.folder-front > .spark { --s: 20px; left: auto; right: -8px; top: -10px; animation-duration: 3.4s; }
+.folder-front > .spark.sp-left { left: -8px; right: auto; --s: 14px; animation-duration: 4.4s; }
+.folder-wrap { display: grid; grid-template-rows: 0fr; transition: grid-template-rows .4s cubic-bezier(.2, .8, .2, 1); }
 .folder.open .folder-wrap { grid-template-rows: 1fr; }
 .folder.open .folder-front { min-height: 0; }
 .folder-content { overflow: hidden; min-height: 0; }
-.folder-inner { display: flex; flex-direction: column; gap: 9px; padding: 8px 0 10px; }
-.folder:not(.open) .folder-inner { visibility: hidden; transition: visibility 0s .38s; }
+.folder-inner { display: flex; flex-direction: column; gap: 9px; padding: 10px 0 10px; }
+.folder:not(.open) .folder-inner { visibility: hidden; transition: visibility 0s .4s; }
 .folder-new {
   display: inline-flex;
   align-items: center;
@@ -831,7 +838,7 @@ textarea.notes-edit { min-height: 92px; display: block; }
   font-size: 19px;
   text-align: left;
 }
-.panel-toggle svg { width: 46px; height: 46px; flex: none; margin: -9px -2px -9px -4px; filter: drop-shadow(0 2px 2px rgba(0, 20, 40, .4)); }
+.panel-toggle svg { width: 54px; height: 54px; flex: none; margin: -14px -6px -12px -9px; filter: drop-shadow(0 2px 2px rgba(0, 20, 40, .4)); }
 .panel-toggle .chev { margin-left: auto; color: #fff; font-size: 26px; }
 .panel-toggle.open .chev { transform: rotate(90deg); }
 .panel.p-verw { padding: 9px 15px; min-height: 59px; display: flex; flex-direction: column; justify-content: center; }
@@ -839,7 +846,7 @@ textarea.notes-edit { min-height: 92px; display: block; }
 .acct img { width: 46px; height: 46px; border-radius: 50%; border: 2px solid rgba(255, 255, 255, .8); box-shadow: 0 3px 8px rgba(0, 0, 0, .25); }
 .acct-local { margin: 0 0 12px; font-size: 15px; line-height: 20.5px; }
 .acct-local::after { content: ''; display: table; clear: both; }
-.acct-local .phone-ic { float: left; width: 27px; height: 46px; margin: 0 9px 0 2px; filter: drop-shadow(0 2px 2px rgba(0, 20, 40, .45)); }
+.acct-local .phone-ic { float: left; width: 25px; height: 39px; margin: 1px 9px 0 2px; filter: drop-shadow(0 2px 2px rgba(0, 20, 40, .45)); }
 .acct-local .phone-ic svg { width: 100%; height: 100%; }
 .acct-local p { margin: 0; }
 .panel .btn.primary.google { height: 50px; padding: 0 27px; font-size: 19px; font-weight: 700; }
@@ -851,9 +858,9 @@ textarea.notes-edit { min-height: 92px; display: block; }
 .btn-row { display: flex; flex-wrap: wrap; gap: 11px; }
 .seg {
   display: flex;
-  height: 49px;
+  height: 47px;
   padding: 4px;
-  margin: 12px 3px 0 0;
+  margin: 9px 3px -3px 0;
   border-radius: 25px;
   background: rgba(150, 190, 205, .18);
   border: 1px solid rgba(255, 255, 255, .22);
@@ -863,10 +870,11 @@ textarea.notes-edit { min-height: 92px; display: block; }
   flex: 1;
   border: 1px solid transparent;
   background: none;
-  padding: 0 6px;
+  padding: 0 2px;
   border-radius: 21px;
   font-weight: 500;
-  font-size: 16px;
+  font-size: 15.5px;
+  white-space: nowrap;
   color: rgba(240, 250, 255, .9);
 }
 .seg button.on {
@@ -1040,7 +1048,7 @@ textarea.notes-edit { min-height: 92px; display: block; }
 }
 .pt-ring {
   position: fixed;
-  width: 70px; height: 70px;
+  width: 56px; height: 56px;
   border-radius: 50%;
   border: 3px solid rgba(190, 255, 220, .85);
   box-shadow: 0 0 22px rgba(150, 255, 200, .7), inset 0 0 14px rgba(150, 255, 200, .5);
@@ -1048,7 +1056,7 @@ textarea.notes-edit { min-height: 92px; display: block; }
 }
 .orb {
   position: fixed;
-  width: 34px; height: 34px;
+  width: 24px; height: 24px;
   border-radius: 50%;
   pointer-events: none;
   background: radial-gradient(circle at 32% 28%, #fff 0 16%, rgba(190, 240, 255, .55) 38%, rgba(110, 170, 255, .45) 70%, rgba(170, 130, 255, .7) 100%);
@@ -1073,13 +1081,13 @@ textarea.notes-edit { min-height: 92px; display: block; }
   top: -30%; bottom: -30%;
   left: 0;
   width: 38%;
-  background: linear-gradient(100deg, transparent, rgba(255, 255, 255, .6), transparent);
+  background: linear-gradient(100deg, transparent, rgba(255, 255, 255, .36), transparent);
   transform: translateX(-160%) skewX(-22deg);
-  animation: shine 5s ease-in-out infinite;
+  animation: shine 8s ease-in-out infinite;
   pointer-events: none;
 }
 .empty-state .btn.primary::after { animation-delay: 1.6s; }
-@keyframes shine { 0%, 62% { transform: translateX(-160%) skewX(-22deg); } 100% { transform: translateX(360%) skewX(-22deg); } }
+@keyframes shine { 0%, 76% { transform: translateX(-160%) skewX(-22deg); } 100% { transform: translateX(360%) skewX(-22deg); } }
 
 /* Panels: Lichtstreif beim Erscheinen */
 .panel { overflow: hidden; }
@@ -1089,7 +1097,7 @@ textarea.notes-edit { min-height: 92px; display: block; }
   top: 0; bottom: 0;
   left: 0;
   width: 45%;
-  background: linear-gradient(100deg, transparent, rgba(255, 255, 255, .16), transparent);
+  background: linear-gradient(100deg, transparent, rgba(255, 255, 255, .09), transparent);
   transform: translateX(-130%) skewX(-18deg);
   animation: panelSweep 1.4s .35s cubic-bezier(.4, 0, .2, 1) both;
   pointer-events: none;
@@ -1107,10 +1115,10 @@ textarea.notes-edit { min-height: 92px; display: block; }
   animation: ringPulse 2.8s ease-out infinite;
   pointer-events: none;
 }
-.fab.spin svg { animation: fabSpin .55s cubic-bezier(.34, 1.56, .64, 1); }
-@keyframes fabFloat { 0%, 100% { translate: 0 0; } 50% { translate: 0 -4px; } }
-@keyframes ringPulse { 0% { transform: scale(.92); opacity: .8; } 100% { transform: scale(1.45); opacity: 0; } }
-@keyframes fabSpin { from { transform: rotate(0) scale(.7); } to { transform: rotate(180deg) scale(1); } }
+.fab.spin svg { animation: fabSpin .45s cubic-bezier(.2, .9, .3, 1); }
+@keyframes fabFloat { 0%, 100% { translate: 0 0; } 50% { translate: 0 -2px; } }
+@keyframes ringPulse { 0% { transform: scale(.95); opacity: .42; } 100% { transform: scale(1.28); opacity: 0; } }
+@keyframes fabSpin { from { transform: rotate(0) scale(.85); } to { transform: rotate(90deg) scale(1); } }
 
 /* Tab-Leiste: gleitendes Glas-Leuchten unter dem aktiven Tab */
 .tab-glow {
@@ -1119,29 +1127,20 @@ textarea.notes-edit { min-height: 92px; display: block; }
   left: 6px;
   width: calc((100% - 12px) / 3);
   border-radius: 28px;
-  background:
-    radial-gradient(70% 55% at 50% 38%, rgba(255, 255, 255, .38), rgba(255, 255, 255, .06) 70%, transparent),
-    linear-gradient(180deg, rgba(255, 255, 255, .16), rgba(255, 255, 255, .02));
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .55), inset 0 0 0 1px rgba(255, 255, 255, .18), 0 0 18px rgba(170, 240, 255, .25);
+  background: radial-gradient(55% 50% at 50% 40%, rgba(255, 255, 255, .2), rgba(255, 255, 255, .05) 65%, transparent 80%);
   transform: translateX(calc(var(--tab-i, 0) * 100%));
-  transition: transform .55s cubic-bezier(.34, 1.45, .64, 1);
+  transition: transform .5s cubic-bezier(.3, 1.15, .5, 1);
   pointer-events: none;
 }
 
 /* Spross: wächst und wiegt sich */
-.empty-state .sprout { transform-origin: 52% 94%; animation: sway 5.5s ease-in-out infinite; }
-.sprout .sp-leafL { transform-box: fill-box; transform-origin: 96% 72%; animation: flutterL 4.6s ease-in-out infinite; }
-.sprout .sp-leafR { transform-box: fill-box; transform-origin: 3% 97%; animation: flutterR 5.2s ease-in-out infinite; }
-.sprout .sp-star { transform-box: fill-box; transform-origin: 50% 50%; animation: starTwinkle 2.6s ease-in-out infinite; }
-.grow .sprout .sp-stem { stroke-dasharray: 90; stroke-dashoffset: 90; animation: drawStem .7s .1s cubic-bezier(.3, .7, .3, 1) forwards; }
-.grow .sprout .sp-leafL { animation: leafPop .8s .55s cubic-bezier(.34, 1.56, .64, 1) both, flutterL 4.6s 1.4s ease-in-out infinite; }
-.grow .sprout .sp-leafR { animation: leafPop .8s .72s cubic-bezier(.34, 1.56, .64, 1) both, flutterR 5.2s 1.6s ease-in-out infinite; }
-.grow .sprout .sp-shadow { transform-box: fill-box; transform-origin: 50% 50%; animation: shadowIn .7s .1s ease-out both; }
-.grow .sprout .sp-star { animation: starPop .7s 1.35s cubic-bezier(.34, 1.56, .64, 1) both, starTwinkle 2.6s 2.1s ease-in-out infinite; }
+.grow .sprout-wrap { animation: sproutGrow .9s .1s cubic-bezier(.25, 1.1, .45, 1) both; }
+.grow .sprout-shadow { animation: shadowIn .8s .1s ease-out both; }
+@keyframes sproutGrow { from { opacity: 0; transform: translateY(10px) scale(.6); } 55% { opacity: 1; } to { opacity: 1; transform: none; } }
 .grow p { animation: riseIn .6s 1s cubic-bezier(.2, .9, .25, 1.1) both; }
 .grow .btn { animation: riseIn .6s 1.15s cubic-bezier(.2, .9, .25, 1.1) both; }
 .grow .specks { animation: fadeIn 1s .9s ease-out both; }
-@keyframes sway { 0%, 100% { transform: rotate(-2.2deg); } 50% { transform: rotate(2.2deg); } }
+@keyframes sway { 0%, 100% { transform: rotate(-1.3deg); } 50% { transform: rotate(1.3deg); } }
 @keyframes flutterL { 0%, 100% { transform: rotate(0); } 50% { transform: rotate(-4deg); } }
 @keyframes flutterR { 0%, 100% { transform: rotate(0); } 50% { transform: rotate(5deg); } }
 @keyframes drawStem { to { stroke-dashoffset: 0; } }
@@ -1149,10 +1148,10 @@ textarea.notes-edit { min-height: 92px; display: block; }
 @keyframes shadowIn { from { transform: scale(.2); opacity: 0; } to { transform: none; opacity: 1; } }
 @keyframes starPop { from { transform: scale(0) rotate(-90deg); opacity: 0; } to { transform: none; opacity: 1; } }
 @keyframes starTwinkle { 0%, 100% { transform: scale(.75) rotate(0); opacity: .75; } 50% { transform: scale(1.2) rotate(45deg); opacity: 1; } }
-@keyframes riseIn { from { opacity: 0; transform: translateY(16px) scale(.96); } to { opacity: 1; transform: none; } }
+@keyframes riseIn { from { opacity: 0; transform: translateY(8px) scale(.985); } to { opacity: 1; transform: none; } }
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 .speck { animation: drift 7s ease-in-out infinite alternate, speckTwinkle 3.4s ease-in-out infinite; }
-@keyframes speckTwinkle { 0%, 100% { filter: brightness(1); } 50% { filter: brightness(1.8); } }
+@keyframes speckTwinkle { 0%, 100% { filter: brightness(1); } 50% { filter: brightness(1.4); } }
 
 /* Hintergrund: weicher Wechsel zwischen den Tabs, atmende Aurora, aufsteigende Blasen */
 .bgl { position: absolute; inset: 0; opacity: 0; transition: opacity .8s ease; }
@@ -1161,8 +1160,8 @@ body[data-tab="start"] .bgl-start, body[data-tab="mehr"] .bgl-mehr, body[data-ta
 .flare { animation: flarePulse 6s ease-in-out infinite; }
 .arc.a1 { animation: arcTurn 30s ease-in-out infinite alternate; }
 .arc.a2 { animation: arcTurn 38s ease-in-out infinite alternate-reverse; }
-@keyframes haloBreath { from { transform: rotate(-3deg) scale(.99); } to { transform: rotate(4deg) scale(1.05); } }
-@keyframes flarePulse { 0%, 100% { scale: 1; } 50% { scale: 1.18; } }
+@keyframes haloBreath { from { transform: rotate(-1.5deg) scale(.995); } to { transform: rotate(2deg) scale(1.025); } }
+@keyframes flarePulse { 0%, 100% { scale: 1; } 50% { scale: 1.08; } }
 @keyframes arcTurn { from { transform: rotate(-4deg); } to { transform: rotate(5deg); } }
 .rise {
   position: absolute;
@@ -1185,21 +1184,18 @@ body[data-tab="start"] .bgl-start, body[data-tab="mehr"] .bgl-mehr, body[data-ta
 .drop { animation: wobble var(--w, 5s) ease-in-out infinite; }
 @keyframes wobble {
   0%, 100% { transform: rotate(var(--r, 0deg)) scale(1, 1); }
-  35% { transform: rotate(var(--r, 0deg)) scale(1.06, .94); }
-  70% { transform: rotate(var(--r, 0deg)) scale(.96, 1.05); }
+  35% { transform: rotate(var(--r, 0deg)) scale(1.03, .97); }
+  70% { transform: rotate(var(--r, 0deg)) scale(.98, 1.025); }
 }
 
 /* Ordner: Blätter fächern beim Öffnen nacheinander auf, Reiter heben sich */
-.folder-tab { transition: transform .35s cubic-bezier(.34, 1.56, .64, 1), filter .3s; }
-.folder.open .folder-tab { transform: translateY(-3px); filter: drop-shadow(0 -4px 10px rgba(255, 255, 255, .22)); }
-@media (hover: hover) { .folder:not(.open) .folder-tab:hover { transform: translateY(-3px); } }
-.folder.just-opened .folder-inner > .card { animation: paperIn .55s cubic-bezier(.2, .9, .3, 1.15) both; animation-delay: calc(var(--i, 0) * 65ms + 120ms); }
-@keyframes paperIn { from { opacity: 0; transform: translateY(-18px) scale(.94) rotate(-1.5deg); } to { opacity: 1; transform: none; } }
+.folder.just-opened .folder-inner > .card { animation: paperIn .45s cubic-bezier(.2, .8, .2, 1) both; animation-delay: calc(var(--i, 0) * 45ms + 100ms); }
+@keyframes paperIn { from { opacity: 0; transform: translateY(-8px) scale(.985); } to { opacity: 1; transform: none; } }
 .count.bump { animation: bump .6s cubic-bezier(.34, 1.56, .64, 1); }
-@keyframes bump { 0% { transform: scale(1); } 40% { transform: scale(1.5); background: rgba(255, 255, 255, .55); color: #0b2f45; } 100% { transform: scale(1); } }
+@keyframes bump { 0% { transform: scale(1); } 40% { transform: scale(1.22); background: rgba(255, 255, 255, .4); } 100% { transform: scale(1); } }
 
 /* Karten: sanftes Anheben, aufklappen mit Schwung */
-@media (hover: hover) { .card:not(.open):not(.dragging):hover { transform: translateY(-2px); } }
+@media (hover: hover) { .card:not(.open):not(.dragging):hover { transform: translateY(-1px); } }
 .card { transition: transform .25s ease, box-shadow .25s ease; }
 .card-head:active .card-main { transform: scale(.985); }
 .card-main { transition: transform .15s; }
@@ -1211,13 +1207,13 @@ body[data-tab="start"] .bgl-start, body[data-tab="mehr"] .bgl-mehr, body[data-ta
 .card-body > :nth-child(5) { animation-delay: .16s; }
 
 /* Sheets federn herein, Inhalte nacheinander */
-.sheet { transition: transform .5s cubic-bezier(.32, 1.32, .55, 1); }
+.sheet { transition: transform .42s cubic-bezier(.25, 1.08, .4, 1); }
 .sheet-backdrop.show .sheet > * { animation: riseIn .45s both; animation-delay: calc(var(--i, 0) * 40ms + 90ms); }
-@media (min-width: 700px) { .sheet { transition: transform .45s cubic-bezier(.32, 1.4, .55, 1), opacity .25s; } }
+@media (min-width: 700px) { .sheet { transition: transform .4s cubic-bezier(.25, 1.08, .4, 1), opacity .25s; } }
 
 /* Hinweise: federn hoch, Rückgängig-Zeitbalken */
-.toast { position: relative; overflow: hidden; animation: toastIn .5s cubic-bezier(.34, 1.56, .64, 1); }
-@keyframes toastIn { from { opacity: 0; transform: translateY(24px) scale(.9); } to { opacity: 1; transform: none; } }
+.toast { position: relative; overflow: hidden; animation: toastIn .4s cubic-bezier(.2, .9, .3, 1); }
+@keyframes toastIn { from { opacity: 0; transform: translateY(12px) scale(.97); } to { opacity: 1; transform: none; } }
 .toast-bar { position: absolute; left: 0; bottom: 0; height: 3px; width: 100%; background: linear-gradient(90deg, #8ff2ff, #c9a0ff); transform-origin: left; animation: toastBar linear forwards; }
 @keyframes toastBar { from { transform: scaleX(1); } to { transform: scaleX(0); } }
 
@@ -1234,7 +1230,7 @@ body[data-tab="start"] .bgl-start, body[data-tab="mehr"] .bgl-mehr, body[data-ta
     rgba(170, 210, 225, .35);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, .85), 0 2px 8px rgba(0, 30, 60, .3);
   transform: translateX(calc(var(--seg-i, 0) * 100%));
-  transition: transform .55s cubic-bezier(.34, 1.45, .64, 1);
+  transition: transform .45s cubic-bezier(.3, 1.12, .5, 1);
   pointer-events: none;
 }
 .seg button { z-index: 1; transition: color .3s; }
@@ -1253,14 +1249,14 @@ body[data-tab="start"] .bgl-start, body[data-tab="mehr"] .bgl-mehr, body[data-ta
 #splash img {
   width: 132px; height: 132px;
   filter: drop-shadow(0 0 30px rgba(120, 230, 255, .65)) drop-shadow(0 10px 20px rgba(0, 10, 30, .5));
-  animation: splashPop .75s cubic-bezier(.34, 1.56, .64, 1) both;
+  animation: splashPop .5s cubic-bezier(.2, .9, .3, 1) both;
 }
-#splash.out { opacity: 0; transform: scale(1.08); pointer-events: none; }
-@keyframes splashPop { from { opacity: 0; transform: scale(.4) rotate(-12deg); } to { opacity: 1; transform: none; } }
+#splash.out { opacity: 0; transform: scale(1.03); pointer-events: none; }
+@keyframes splashPop { from { opacity: 0; transform: scale(.82); } to { opacity: 1; transform: none; } }
 html[data-theme="light"] #splash { background: radial-gradient(60% 40% at 50% 45%, #c6f1fb, #2aa7ee 75%); }
 
 @media (prefers-reduced-motion: reduce) {
-  .bg *, .drops *, .empty-state .sprout, .sprout *, .speck, .spark, .fab, .fab::after, .btn.primary::after, .panel::after { animation: none !important; }
+  .bg *, .drops *, .sprout-wrap, .sprout-img, .speck, .spark, .fab, .fab::after, .btn.primary::after, .panel::after { animation: none !important; }
   *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
 }
 </style>
@@ -1305,7 +1301,7 @@ const FIREBASE_CONFIG = {
 /* ==========================================================================
    1. Konstanten & Helfer
    ========================================================================== */
-const APP_VERSION = '1.3.0';
+const APP_VERSION = '1.4.0';
 const LS = { data: 'lifeio-data', theme: 'lifeio-theme' };
 const CDN = {
   fbApp: 'https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js',
@@ -1318,17 +1314,19 @@ const LEARNED = 'learned';
 const STATUSES = ['idea', 'active', 'paused', 'learned', 'discarded'];
 
 const COLORS = [
-  ['rot', '#f0475a'], ['orange', '#ff8a1f'], ['gelb', '#ffcc14'], ['gruen', '#62c316'],
+  ['rot', '#f0475a'], ['orange', '#ff8a1f'], ['gelb', '#ffcc14'], ['gruen', '#74c414'],
   ['mint', '#2fd4b0'], ['tuerkis', '#16b6d8'], ['blau', '#2f8cff'], ['indigo', '#5b6cff'],
-  ['lila', '#a55cf0'], ['pink', '#ff4fa0'], ['braun', '#b07a4f'], ['grau', '#8fa6b8']
+  ['lila', '#a55cf0'], ['pink', '#ff4fa0'], ['braun', '#b07a4f'], ['grau', '#7d9cb8']
 ];
 const COLOR = Object.fromEntries(COLORS);
 const EMOJIS = ['🎵', '🎸', '🗣️', '🏃', '🧘', '🎨', '📷', '✍️', '💻', '🍳', '📚', '🧠', '🌱', '🛠️', '🎮', '♟️'];
 
 /* Feste Ordner – nur im Code, nicht in der Datenbank */
 const FIXED = {
-  [LEARNED]: { id: LEARNED, name: 'Gelernt', emoji: '✅', icon: 'check', color: 'gruen', fixed: true },
-  [UNSORTED]: { id: UNSORTED, name: 'Unsortiert', emoji: '📥', icon: 'inbox', color: 'grau', fixed: true }
+  [LEARNED]: { id: LEARNED, name: 'Gelernt', emoji: '✅', icon: 'check', color: 'gruen', fixed: true,
+    pal: ['#a2d81e', '#7cb409', '#4c9112', '#62bf1e', '#47a01c', '#2f7d16'] },
+  [UNSORTED]: { id: UNSORTED, name: 'Unsortiert', emoji: '📥', icon: 'inbox', color: 'grau', fixed: true,
+    pal: ['#b9d1e5', '#7092b2', '#56738f', '#94b4cd', '#7593ad', '#4a6681'] }
 };
 
 const $ = (s, r = document) => r.querySelector(s);
@@ -1457,24 +1455,7 @@ const ICON = {
   inbox: `<svg viewBox="0 0 32 32" aria-hidden="true"><path d="M3.5 18h7.5l2 4h6l2-4h7.5v7.5a3 3 0 0 1-3 3h-19a3 3 0 0 1-3-3Z" fill="url(#i-tray)" stroke="#3f6f9e" stroke-width="1.4"/>
     <path d="M3.5 18l3.5-6h18l3.5 6" fill="#e9f3fb" stroke="#3f6f9e" stroke-width="1.4" stroke-linejoin="round"/>
     <path d="M16 2.5v11.5M11.2 9.5 16 14.2l4.8-4.7" fill="none" stroke="#e8393a" stroke-width="3.3" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
-  plus: `<svg viewBox="0 0 32 32" aria-hidden="true"><path d="M16 6.5v19M6.5 16h19" stroke="#fff" stroke-width="5" stroke-linecap="round"/></svg>`,
-  sprout: `<svg class="sprout" viewBox="0 0 180 150" aria-hidden="true">
-    <ellipse class="sp-shadow" cx="93" cy="141" rx="44" ry="7.5" fill="url(#i-shadow)"/>
-    <path class="sp-stem" d="M92 139C88 119 86 99 100 77" fill="none" stroke="url(#i-stem)" stroke-width="11" stroke-linecap="round"/>
-    <g class="sp-leafL">
-    <path d="M92 98C78 46 20 38 0 110c40 26 82 18 92-12Z" fill="url(#i-leafL)"/><path d="M92 98C72 116 34 124 0 110c36 12 70 10 92-12Z" fill="#14520c" fill-opacity=".35"/>
-    <path d="M86 95C64 88 34 92 10 103" fill="none" stroke="#eaffc0" stroke-opacity=".6" stroke-width="2" stroke-linecap="round"/>
-    <path d="M80 80C62 68 38 70 18 90c22-10 42-14 62-10Z" fill="#fff" fill-opacity=".3"/>
-    <g fill="url(#i-drop)"><circle cx="38" cy="90" r="6.5"/><circle cx="62" cy="83" r="3.8"/></g>
-    <g fill="#fff"><circle cx="36" cy="88" r="1.7"/></g></g>
-    <g class="sp-leafR">
-    <path d="M99 79C101 31 132 3 178 0c5 48-25 82-79 79Z" fill="url(#i-leafR)"/><path d="M99 79C130 72 160 46 178 0c5 48-25 82-79 79Z" fill="#14520c" fill-opacity=".3"/>
-    <path d="M103 74C122 52 146 28 170 9" fill="none" stroke="#eaffc0" stroke-opacity=".6" stroke-width="2" stroke-linecap="round"/>
-    <path d="M108 60C116 34 138 16 168 8c-24 10-44 28-60 52Z" fill="#fff" fill-opacity=".3"/>
-    <g fill="url(#i-drop)"><circle cx="132" cy="31" r="7.5"/><circle cx="153" cy="20" r="4.6"/><circle cx="120" cy="50" r="3.2"/></g>
-    <g fill="#fff"><circle cx="130" cy="28.5" r="2"/><circle cx="152" cy="18.8" r="1.2"/></g></g>
-    <path class="sp-star" d="M34 58l2.2 7.3 7.3 2.2-7.3 2.2L34 77l-2.2-7.3-7.3-2.2 7.3-2.2Z" fill="#fff"/>
-  </svg>`
+  plus: `<svg viewBox="0 0 32 32" aria-hidden="true"><path d="M16 6.5v19M6.5 16h19" stroke="#fff" stroke-width="5" stroke-linecap="round"/></svg>`
 };
 const ICON_DEFS = `<svg id="icon-defs" width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs>
   <linearGradient id="i-roof" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ff7d5e"/><stop offset="1" stop-color="#cf322a"/></linearGradient>
@@ -1498,11 +1479,6 @@ const ICON_DEFS = `<svg id="icon-defs" width="0" height="0" style="position:abso
   <linearGradient id="i-gffront" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f1f6fa"/><stop offset=".6" stop-color="#c4d2de"/><stop offset="1" stop-color="#97abbd"/></linearGradient>
   <linearGradient id="i-check" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#86e663"/><stop offset="1" stop-color="#2a9a2e"/></linearGradient>
   <linearGradient id="i-tray" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#9fcaf2"/><stop offset="1" stop-color="#4f86c4"/></linearGradient>
-  <radialGradient id="i-leafL" cx=".62" cy=".22" r=".95"><stop offset="0" stop-color="#c8f46a"/><stop offset=".3" stop-color="#74cc2c"/><stop offset=".65" stop-color="#2f9a18"/><stop offset="1" stop-color="#155f0c"/></radialGradient>
-  <radialGradient id="i-leafR" cx=".35" cy=".28" r=".95"><stop offset="0" stop-color="#c8f46a"/><stop offset=".3" stop-color="#74cc2c"/><stop offset=".65" stop-color="#2f9a18"/><stop offset="1" stop-color="#155f0c"/></radialGradient>
-  <linearGradient id="i-stem" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#2f8f1f"/><stop offset=".45" stop-color="#a6ea5c"/><stop offset="1" stop-color="#3c9a24"/></linearGradient>
-  <radialGradient id="i-drop" cx=".35" cy=".3" r=".75"><stop offset="0" stop-color="#ffffff" stop-opacity=".95"/><stop offset=".35" stop-color="#e6ffd6" stop-opacity=".4"/><stop offset="1" stop-color="#1f6d14" stop-opacity=".6"/></radialGradient>
-  <radialGradient id="i-shadow"><stop offset="0" stop-color="#001208" stop-opacity=".65"/><stop offset="1" stop-color="#001208" stop-opacity="0"/></radialGradient>
 </defs></svg>`;
 
 /* ==========================================================================
@@ -2128,7 +2104,7 @@ const FX = (() => {
     rp.className = 'ripple';
     rp.style.cssText = `width:${s}px;height:${s}px;left:${e.clientX - r.left - s / 2}px;top:${e.clientY - r.top - s / 2}px`;
     host.appendChild(rp);
-    rp.animate([{ transform: 'scale(0)', opacity: .55 }, { transform: 'scale(1)', opacity: 0 }], { duration: 650, easing: SMOOTH }).onfinish = () => rp.remove();
+    rp.animate([{ transform: 'scale(0)', opacity: .32 }, { transform: 'scale(1)', opacity: 0 }], { duration: 560, easing: SMOOTH }).onfinish = () => rp.remove();
   }, true);
 
   /** Elemente einer Ansicht nacheinander hereinkommen lassen */
@@ -2141,21 +2117,21 @@ const FX = (() => {
     }
     return out;
   }
-  function enter(root, { dx = 0, dy = 18, base = 0, step = 50 } = {}) {
+  function enter(root, { dx = 0, dy = 10, base = 0, step = 38 } = {}) {
     if (!ok()) return;
     collect(root).forEach((el, i) => {
       el.animate([
-        { opacity: 0, transform: `translate(${dx}px, ${dy}px) scale(.96)` },
+        { opacity: 0, transform: `translate(${dx}px, ${dy}px) scale(.985)` },
         { opacity: 1, transform: 'none' }
-      ], { duration: 560, delay: base + Math.min(i, 10) * step, easing: 'cubic-bezier(.2,.9,.25,1.12)', fill: 'backwards' });
+      ], { duration: 480, delay: base + Math.min(i, 10) * step, easing: SMOOTH, fill: 'backwards' });
     });
   }
   /** Tab-Wechsel: Inhalt gleitet aus der passenden Richtung herein, Titel mit */
   function enterTab(view, from, to) {
     const dir = TAB_ORDER.indexOf(to) >= TAB_ORDER.indexOf(from) ? 1 : -1;
-    enter(view, { dx: 34 * dir, dy: 6, step: 40 });
+    enter(view, { dx: 16 * dir, dy: 0, step: 32 });
     if (!ok()) return;
-    $('#title').animate([{ opacity: 0, transform: `translateX(${24 * dir}px)` }, { opacity: 1, transform: 'none' }], { duration: 450, easing: SMOOTH });
+    $('#title').animate([{ opacity: 0, transform: `translateX(${10 * dir}px)` }, { opacity: 1, transform: 'none' }], { duration: 400, easing: SMOOTH });
   }
 
   /* ---------- FLIP: Karten gleiten an ihren neuen Platz ---------- */
@@ -2178,7 +2154,7 @@ const FX = (() => {
       const b = before.get(k);
       const r = el.getBoundingClientRect();
       if (!b) {
-        el.animate([{ opacity: 0, transform: 'scale(.88) translateY(14px)' }, { opacity: 1, transform: 'none' }], { duration: 520, easing: SPRING });
+        el.animate([{ opacity: 0, transform: 'scale(.96) translateY(8px)' }, { opacity: 1, transform: 'none' }], { duration: 420, easing: SMOOTH });
         return;
       }
       if (b.hidden) return;
@@ -2212,13 +2188,13 @@ const FX = (() => {
       const dy = tr.top + tr.height / 2 - (r.top + r.height / 2);
       frames = [
         { transform: 'none', opacity: 1 },
-        { transform: `translate(${dx * .2}px, ${dy * .2 - 46}px) scale(.66) rotate(-5deg)`, opacity: 1, offset: .32 },
-        { transform: `translate(${dx}px, ${dy}px) scale(.05) rotate(10deg)`, opacity: .25 }
+        { transform: `translate(${dx * .2}px, ${dy * .2 - 22}px) scale(.8) rotate(-2deg)`, opacity: 1, offset: .32 },
+        { transform: `translate(${dx}px, ${dy}px) scale(.06) rotate(4deg)`, opacity: .2 }
       ];
-      opts = { duration: 860, easing: 'cubic-bezier(.45,0,.25,1)', fill: 'forwards' };
+      opts = { duration: 760, easing: 'cubic-bezier(.45,0,.25,1)', fill: 'forwards' };
     } else if (hint.kind === 'discard') {
-      frames = [{ transform: 'none', opacity: 1 }, { transform: 'translateY(-10px) rotate(-2deg)', opacity: 1, offset: .25 }, { transform: 'translateY(90px) rotate(9deg) scale(.82)', opacity: 0 }];
-      opts = { duration: 620, easing: 'cubic-bezier(.5,0,.75,0)', fill: 'forwards' };
+      frames = [{ transform: 'none', opacity: 1 }, { transform: 'translateY(-5px) rotate(-1deg)', opacity: 1, offset: .25 }, { transform: 'translateY(60px) rotate(5deg) scale(.9)', opacity: 0 }];
+      opts = { duration: 560, easing: 'cubic-bezier(.5,0,.75,0)', fill: 'forwards' };
     } else {
       frames = [{ transform: 'none', opacity: 1 }, { transform: 'scale(.88)', opacity: 0 }];
       opts = { duration: 340, easing: 'ease-in', fill: 'forwards' };
@@ -2246,14 +2222,14 @@ const FX = (() => {
   }
 
   /* ---------- Konfetti / Sterne / Blasen ---------- */
-  function burst(x, y, { n = 18, spread = 110, big = false } = {}) {
+  function burst(x, y, { n = 10, spread = 80, big = false } = {}) {
     if (!ok()) return;
-    if (big) { n = 36; spread = 175; ring(x, y); }
+    if (big) { n = 22; spread = 130; ring(x, y); }
     for (let i = 0; i < n; i++) {
       const p = document.createElement('span');
       const kind = Math.random();
       p.className = 'pt ' + (kind < .38 ? 'star' : kind < .7 ? 'bub' : 'dot');
-      const s = (kind < .38 ? 11 : kind < .7 ? 8 : 4) + Math.random() * (big ? 9 : 5);
+      const s = (kind < .38 ? 8 : kind < .7 ? 6 : 3) + Math.random() * (big ? 6 : 4);
       p.style.cssText = `left:${x}px;top:${y}px;width:${s}px;height:${s}px;--c:${COLORS_FX[i % COLORS_FX.length]}`;
       layer().appendChild(p);
       const ang = Math.random() * Math.PI * 2, dist = spread * (.35 + Math.random() * .65);
@@ -2261,8 +2237,8 @@ const FX = (() => {
       p.animate([
         { transform: 'translate(-50%,-50%) scale(.2)', opacity: 1 },
         { transform: `translate(calc(-50% + ${tx * .72}px), calc(-50% + ${ty * .72}px)) scale(1) rotate(${Math.random() * 180}deg)`, opacity: 1, offset: .42 },
-        { transform: `translate(calc(-50% + ${tx}px), calc(-50% + ${ty + 60}px)) scale(.15) rotate(${Math.random() * 360}deg)`, opacity: 0 }
-      ], { duration: 800 + Math.random() * 500, easing: 'cubic-bezier(.2,.8,.3,1)' }).onfinish = () => p.remove();
+        { transform: `translate(calc(-50% + ${tx}px), calc(-50% + ${ty + 36}px)) scale(.15) rotate(${Math.random() * 240}deg)`, opacity: 0 }
+      ], { duration: 700 + Math.random() * 400, easing: 'cubic-bezier(.2,.8,.3,1)' }).onfinish = () => p.remove();
     }
   }
   function ring(x, y) {
@@ -2270,22 +2246,22 @@ const FX = (() => {
     r.className = 'pt-ring';
     r.style.cssText = `left:${x}px;top:${y}px`;
     layer().appendChild(r);
-    r.animate([{ transform: 'translate(-50%,-50%) scale(.2)', opacity: .95 }, { transform: 'translate(-50%,-50%) scale(3.4)', opacity: 0 }], { duration: 750, easing: SMOOTH }).onfinish = () => r.remove();
+    r.animate([{ transform: 'translate(-50%,-50%) scale(.3)', opacity: .7 }, { transform: 'translate(-50%,-50%) scale(2.6)', opacity: 0 }], { duration: 700, easing: SMOOTH }).onfinish = () => r.remove();
   }
   function pop(el) {
     if (!ok() || !el) return;
-    el.animate([{ transform: 'scale(1)' }, { transform: 'scale(1.12)' }, { transform: 'scale(1)' }], { duration: 420, easing: SPRING });
+    el.animate([{ transform: 'scale(1)' }, { transform: 'scale(1.05)' }, { transform: 'scale(1)' }], { duration: 380, easing: SMOOTH });
   }
   /** Tab-Icon wackelt wie Gelee und funkelt */
   function bounceTab(tab) {
     const ic = $(`.tab-btn[data-tab="${tab}"] .ico`);
     if (!ic || !ok()) return;
     ic.animate([
-      { transform: 'scale(1)' }, { transform: 'scale(1.38, .74)' }, { transform: 'scale(.84, 1.22)' },
-      { transform: 'scale(1.1, .92)' }, { transform: 'scale(.97, 1.03)' }, { transform: 'scale(1)' }
-    ], { duration: 700, easing: 'ease-out' });
+      { transform: 'scale(1)' }, { transform: 'scale(1.14, .9)' }, { transform: 'scale(.95, 1.07)' },
+      { transform: 'scale(1.03, .98)' }, { transform: 'scale(1)' }
+    ], { duration: 560, easing: 'ease-out' });
     const r = ic.getBoundingClientRect();
-    burst(r.left + r.width / 2, r.top + r.height / 2, { n: 12, spread: 62 });
+    burst(r.left + r.width / 2, r.top + r.height / 2, { n: 6, spread: 40 });
   }
   /** Leuchtkugel fliegt vom Erfassen zum Ziel-Tab */
   function fly(from, tab) {
@@ -2299,23 +2275,23 @@ const FX = (() => {
     const dx = tr.left + tr.width / 2 - from.x, dy = tr.top + tr.height / 2 - from.y;
     o.animate([
       { transform: 'translate(-50%,-50%) scale(.3)', opacity: 0 },
-      { transform: `translate(calc(-50% + ${dx * .3}px), calc(-50% + ${dy * .3 - 80}px)) scale(1.15)`, opacity: 1, offset: .35 },
+      { transform: `translate(calc(-50% + ${dx * .3}px), calc(-50% + ${dy * .3 - 48}px)) scale(1)`, opacity: 1, offset: .35 },
       { transform: `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px)) scale(.35)`, opacity: .7 }
     ], { duration: 820, easing: 'cubic-bezier(.45,0,.25,1)' }).onfinish = () => { o.remove(); bounceTab(tab); };
   }
 
   /* ---------- Intro beim Start ---------- */
   function intro() {
-    const base = ok() ? 640 : 0;
+    const base = ok() ? 470 : 0;
     if (ok()) {
       const s = document.createElement('div');
       s.id = 'splash';
       s.innerHTML = '<img src="icon-512.png" alt="">';
       document.body.appendChild(s);
-      setTimeout(() => { s.classList.add('out'); setTimeout(() => s.remove(), 520); }, 620);
-      $('#title').animate([{ opacity: 0, transform: 'translateY(-14px)' }, { opacity: 1, transform: 'none' }], { duration: 600, delay: base, easing: SMOOTH, fill: 'backwards' });
-      $('.tabbar-inner').animate([{ transform: 'translateY(140%)' }, { transform: 'none' }], { duration: 750, delay: base + 120, easing: SPRING, fill: 'backwards' });
-      $('#fab').animate([{ transform: 'scale(0) rotate(-120deg)' }, { transform: 'none' }], { duration: 700, delay: base + 380, easing: SPRING, fill: 'backwards' });
+      setTimeout(() => { s.classList.add('out'); setTimeout(() => s.remove(), 450); }, 460);
+      $('#title').animate([{ opacity: 0, transform: 'translateY(-6px)' }, { opacity: 1, transform: 'none' }], { duration: 520, delay: base, easing: SMOOTH, fill: 'backwards' });
+      $('.tabbar-inner').animate([{ opacity: 0, transform: 'translateY(40%)' }, { opacity: 1, transform: 'none' }], { duration: 620, delay: base + 100, easing: SMOOTH, fill: 'backwards' });
+      $('#fab').animate([{ opacity: 0, transform: 'scale(.7)' }, { opacity: 1, transform: 'none' }], { duration: 560, delay: base + 260, easing: SMOOTH, fill: 'backwards' });
     }
     enter($('#view'), { base: base + 80 });
   }
@@ -2483,7 +2459,7 @@ function viewStart(view) {
   const grow = !(view._key || '').includes('empty-state');
   document.body.classList.toggle('start-empty', !act.length);
   if (!act.length) {
-    h += `<div class="empty-state __GROW__"><div class="specks" aria-hidden="true">${SPECKS}</div>${ICON.sprout}<p>Du lernst gerade nichts.</p>
+    h += `<div class="empty-state __GROW__"><div class="specks" aria-hidden="true">${SPECKS}</div><div class="sprout-wrap"><span class="sprout-shadow"></span><img class="sprout-img" src="sprout.png" alt="" width="192" height="160"><span class="spark" style="--x:22px;--y:58px;--s:22px;--d:3.4s;--delay:-.6s"></span><span class="spark" style="--x:114px;--y:3px;--s:20px;--d:3.9s;--delay:-2s"></span></div><p>Du lernst gerade nichts.</p>
       <button class="btn primary" data-action="goto-ordner">${ICON.glassFolder}Schau in deine Ideen</button></div>`;
   } else {
     h += `<h2 class="sec-title" data-flip="sec-active">Gerade am Lernen</h2>
@@ -2509,6 +2485,69 @@ function viewOrdner(view) {
   }
   renderCabinet();
 }
+/* ---------- Ordner-Grafik (wie im Mockup): Farben + SVG-Rückwand mit Reiter ---------- */
+function hexToHsl(hex) {
+  const n = parseInt(hex.slice(1), 16);
+  const r = ((n >> 16) & 255) / 255, g = ((n >> 8) & 255) / 255, b = (n & 255) / 255;
+  const mx = Math.max(r, g, b), mn = Math.min(r, g, b), l = (mx + mn) / 2;
+  let h = 0, s = 0;
+  if (mx !== mn) {
+    const d = mx - mn;
+    s = l > .5 ? d / (2 - mx - mn) : d / (mx + mn);
+    h = mx === r ? (g - b) / d + (g < b ? 6 : 0) : mx === g ? (b - r) / d + 2 : (r - g) / d + 4;
+    h /= 6;
+  }
+  return [h * 360, s * 100, l * 100];
+}
+const hsl = (h, s, l) => `hsl(${h.toFixed(0)} ${Math.max(0, Math.min(100, s)).toFixed(0)}% ${Math.max(0, Math.min(100, l)).toFixed(0)}%)`;
+/** Farbtöne einer Mappe aus der Grundfarbe ableiten (gemessen an Gelernt/Unsortiert im Mockup) */
+function folderVars(hex) {
+  const [h, s, l] = hexToHsl(hex);
+  return `--f-tab1:${hsl(h, s + 4, l + 12)};--f-tab2:${hsl(h, s, l - 3)};--f-back:${hsl(h, s, l - 12)};` +
+    `--f-front1:${hsl(h, s, l + 1)};--f-front2:${hsl(h, s, l - 7)};--f-front3:${hsl(h, s - 4, l - 19)}`;
+}
+/** feste Palette (gemessen) als CSS-Variablen */
+const palVars = p => ['tab1', 'tab2', 'back', 'front1', 'front2', 'front3'].map((k, i) => `--f-${k}:${p[i]}`).join(';');
+const TAB_FRAC = [0, .19, .4];
+/** Rückwand mit Reiter als SVG-Pfad zeichnen – passend zur echten Breite und Reiter-Beschriftung */
+function drawFolders() {
+  const F = 15, PAD = 6, YB = 30, H = 72;
+  $$('#cabinet .folder').forEach((sec, i) => {
+    const W = sec.clientWidth;
+    const tab = $('.folder-tab', sec);
+    const art = $('.folder-art', sec);
+    if (!W || !tab || !art) return;
+    const tw = tab.scrollWidth;
+    const first = i % 3 === 0;
+    let path, x0;
+    if (first) {
+      x0 = 14;
+      const topR = x0 + tw + PAD + 2, b = topR + F;
+      path = `M0 ${H}V11Q0 0 11 0H${topR}C${topR + F * .45} 0 ${topR + F * .55} ${YB} ${b} ${YB}H${W - 9}Q${W} ${YB} ${W} ${YB + 9}V${H}Z`;
+    } else {
+      let a = Math.round(W * TAB_FRAC[i % 3]);
+      a = Math.max(0, Math.min(a, W - (tw + 2 * PAD + 2 * F) - 8));
+      const topL = a + F;
+      x0 = topL + PAD;
+      const topR = x0 + tw + PAD, b = topR + F;
+      path = `M0 ${H}V${YB + 9}Q0 ${YB} 9 ${YB}H${a}C${a + F * .55} ${YB} ${a + F * .45} 0 ${topL} 0H${topR}C${topR + F * .45} 0 ${topR + F * .55} ${YB} ${b} ${YB}H${W - 9}Q${W} ${YB} ${W} ${YB + 9}V${H}Z`;
+    }
+    tab.style.left = x0 + 'px';
+    const id = 'fa' + i;
+    art.setAttribute('viewBox', `0 0 ${W} ${H}`);
+    art.innerHTML = `<defs>
+        <linearGradient id="${id}g" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="0" y2="${H}">
+          <stop offset="0" style="stop-color:var(--f-tab1)"/><stop offset="${((YB - 4) / H).toFixed(3)}" style="stop-color:var(--f-tab2)"/><stop offset="${((YB + 6) / H).toFixed(3)}" style="stop-color:var(--f-back)"/><stop offset="1" style="stop-color:var(--f-back)"/></linearGradient>
+        <linearGradient id="${id}s" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="0" y2="${YB}">
+          <stop offset="0" stop-color="#fff" stop-opacity=".45"/><stop offset=".48" stop-color="#fff" stop-opacity=".1"/><stop offset=".5" stop-color="#fff" stop-opacity="0"/></linearGradient>
+      </defs>
+      <path d="${path}" fill="url(#${id}g)"/>
+      <path d="${path}" fill="url(#${id}s)"/>
+      <path d="${path}" fill="none" stroke="#fff" stroke-opacity=".62" stroke-width="1.3"/>`;
+  });
+}
+window.addEventListener('resize', debounce(() => { if (App.tab === 'ordner') drawFolders(); }, 120));
+if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { if (App.tab === 'ordner') drawFolders(); });
 function renderCabinet() {
   const box = $('#cabinet');
   if (!box) return;
@@ -2523,30 +2562,33 @@ function renderCabinet() {
   }
   const folders = [FIXED[LEARNED], FIXED[UNSORTED], ...Data.folders()];
   const counts = App.counts || (App.counts = {});
-  setHTML(box, `<div class="cabinet">${folders.map((f, i) => {
+  const changed = setHTML(box, `<div class="cabinet">${folders.map((f, i) => {
     const items = f.id === LEARNED ? Data.learned() : Data.ideasIn(f.id);
     const bump = counts[f.id] !== undefined && counts[f.id] !== items.length;
     counts[f.id] = items.length;
     const hex = COLOR[f.color] || COLOR.grau;
     const fg = fgFor(hex);
-    const ts = fg === '#ffffff' ? '0 1px 2px rgba(0,0,0,.35)' : '0 1px 0 rgba(255,255,255,.55)';
+    const ts = fg === '#ffffff' ? '0 1px 2px rgba(0,0,0,.45)' : '0 1px 0 rgba(255,255,255,.55)';
     const off = (i % 3) * 24;
     const last = i === folders.length - 1;
     return `<section class="folder ${App.openFolder === f.id ? 'open' : ''} ${off ? '' : 'off0'} ${last ? 'last' : ''}" data-folder="${f.id}" data-flip="folder-${f.id}"
-        style="--fc:${hex};--fc-fg:${fg};--fc-ts:${ts};--off:${off}%">
+        style="--fc:${hex};--fc-fg:${fg};--fc-ts:${ts};--tab-frac:${TAB_FRAC[i % 3]};${f.pal ? palVars(f.pal) : folderVars(hex)}">
+      <svg class="folder-art" aria-hidden="true"></svg>
+      ${last ? '' : `<span class="spark" style="--d:${(4 + (i % 3) * .5).toFixed(1)}s;--delay:-${(i * .9).toFixed(1)}s" aria-hidden="true"></span>`}
       <div class="folder-tab">
         <button class="folder-tab-btn" data-action="toggle-folder" data-id="${f.id}" aria-expanded="${App.openFolder === f.id}">
           ${f.icon ? `<span class="emo">${ICON[f.icon]}</span>` : f.emoji ? `<span class="emo">${esc(f.emoji)}</span>` : ''}<span class="name">${esc(f.name)}</span><span class="count ${bump ? 'bump' : ''}">${items.length}</span>
         </button>
         ${f.fixed ? '' : `<button class="folder-more" data-action="folder-menu" data-id="${f.id}" aria-label="Ordner bearbeiten">⋯</button>`}
       </div>
-      <div class="folder-front"><span class="spark" style="--d:${(3.2 + (i % 4) * .6).toFixed(1)}s;--delay:-${(i * 1.3).toFixed(1)}s" aria-hidden="true"></span><div class="folder-wrap"><div class="folder-content"><div class="folder-inner">
+      <div class="folder-front"><span class="spark" style="--d:${(3.2 + (i % 4) * .6).toFixed(1)}s;--delay:-${(i * 1.3).toFixed(1)}s" aria-hidden="true"></span>${last ? '<span class="spark sp-left" style="--d:4.4s;--delay:-1.7s" aria-hidden="true"></span>' : ''}<div class="folder-wrap"><div class="folder-content"><div class="folder-inner">
         ${items.map((it, k) => cardHTML(it, { chip: f.id === LEARNED, i: k })).join('')}
       </div></div></div></div>
     </section>`;
   }).join('')}
     <button class="folder-new" data-flip="newfolder" data-action="new-folder">+ Neuer Ordner</button>
   </div>`);
+  if (changed) drawFolders();
 }
 
 /* ---------- Tab: Mehr ---------- */
@@ -2875,6 +2917,7 @@ const Actions = {
       s.classList.toggle('open', on);
       $('.folder-tab-btn', s).setAttribute('aria-expanded', on);
     });
+    drawFolders();
     if (App.openFolder) {
       setTimeout(() => {
         const s = $(`#cabinet .folder[data-folder="${App.openFolder}"]`);

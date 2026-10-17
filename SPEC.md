@@ -310,6 +310,10 @@ Erst die App, dann das Design.
   weg). Spross wächst und wiegt sich, Aurora atmet, Blasen steigen, Tropfen wabbeln. Lichtwellen beim Antippen,
   Glanz über lila Knöpfen, pulsierende „+“-Kugel, Leuchtkugel beim Erfassen, auffächernde Ordner-Blätter,
   hüpfende Zahlen, federnde Sheets, Rückgängig-Zeitbalken. Bei „Bewegung reduzieren“ im System alles aus.
+- **v1.4 – Feinschliff nach hochauflösendem Mockup:** Ordner als SVG-Rückwand mit S-Kurven-Reiter + glänzender
+  Vorderklappe (Reiter-Breite passt sich der Beschriftung an; Gelernt/Unsortiert mit gemessenen Farben, eigene
+  Ordner mit abgeleiteten Tönen). Spross als freigestelltes Bild aus dem Mockup (`sprout.png`). Suchleiste als
+  klare Glasröhre. Animationen feiner: weniger Weg, kein starkes Überschwingen, weniger Partikel.
 - Bei „Bewegung reduzieren“ im System stehen alle Animationen still.
 
 ---
