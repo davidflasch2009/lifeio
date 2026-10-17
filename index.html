@@ -1,0 +1,1880 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#f5f5f7">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Lifeio">
+<meta name="description" content="Lifeio – Ideen sammeln und verwalten, was du in deiner Freizeit lernst.">
+<title>Lifeio</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<script>
+  /* Design sofort setzen (kein Aufblitzen im falschen Modus) */
+  try { const t = localStorage.getItem('lifeio-theme'); if (t === 'light' || t === 'dark') document.documentElement.dataset.theme = t; } catch (e) {}
+</script>
+<style>
+/* ==========================================================================
+   1. Design-Tokens (flach & schlicht – das richtige Design kommt später)
+   ========================================================================== */
+:root {
+  --bg: #f5f5f7;
+  --surface: #ffffff;
+  --surface-2: #f0f0f4;
+  --text: #1c1c1f;
+  --muted: #6c6c76;
+  --border: #e3e3e9;
+  --accent: #4f46e5;
+  --accent-fg: #ffffff;
+  --danger: #d9363e;
+  --radius: 14px;
+  --shadow: 0 1px 2px rgba(0,0,0,.05), 0 2px 8px rgba(0,0,0,.05);
+  --tabbar-h: 62px;
+  color-scheme: light;
+}
+html[data-theme="dark"] {
+  --bg: #111114;
+  --surface: #1c1c21;
+  --surface-2: #27272d;
+  --text: #f2f2f5;
+  --muted: #9b9ba5;
+  --border: #2f2f36;
+  --accent: #8d8cff;
+  --accent-fg: #111114;
+  --danger: #ff6b6b;
+  --shadow: 0 1px 2px rgba(0,0,0,.4), 0 2px 10px rgba(0,0,0,.25);
+  color-scheme: dark;
+}
+@media (prefers-color-scheme: dark) {
+  html:not([data-theme="light"]) {
+    --bg: #111114;
+    --surface: #1c1c21;
+    --surface-2: #27272d;
+    --text: #f2f2f5;
+    --muted: #9b9ba5;
+    --border: #2f2f36;
+    --accent: #8d8cff;
+    --accent-fg: #111114;
+    --danger: #ff6b6b;
+    --shadow: 0 1px 2px rgba(0,0,0,.4), 0 2px 10px rgba(0,0,0,.25);
+    color-scheme: dark;
+  }
+}
+
+/* ==========================================================================
+   2. Grundlayout
+   ========================================================================== */
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font: 16px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+  -webkit-tap-highlight-color: transparent;
+}
+button { font: inherit; color: inherit; cursor: pointer; }
+button:disabled { opacity: .45; cursor: default; }
+a { color: var(--accent); }
+.app {
+  max-width: 680px;
+  margin: 0 auto;
+  min-height: 100dvh;
+  padding-bottom: calc(var(--tabbar-h) + env(safe-area-inset-bottom) + 96px);
+}
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: color-mix(in srgb, var(--bg) 88%, transparent);
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
+  padding: calc(env(safe-area-inset-top) + 12px) 16px 8px;
+}
+.topbar h1 { margin: 0; font-size: 30px; font-weight: 800; letter-spacing: -.02em; }
+#view { padding: 4px 16px 16px; }
+
+.tabbar {
+  position: fixed;
+  left: 0; right: 0; bottom: 0;
+  z-index: 30;
+  display: flex;
+  justify-content: center;
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+.tabbar-inner { display: flex; width: 100%; max-width: 680px; height: var(--tabbar-h); }
+.tab-btn {
+  flex: 1;
+  border: 0;
+  background: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  font-size: 12px;
+  color: var(--muted);
+}
+.tab-btn .ico { font-size: 22px; line-height: 1; filter: grayscale(1); opacity: .65; }
+.tab-btn.active { color: var(--accent); font-weight: 650; }
+.tab-btn.active .ico { filter: none; opacity: 1; }
+
+.fab {
+  position: fixed;
+  right: max(16px, calc((100vw - 680px) / 2 + 16px));
+  bottom: calc(var(--tabbar-h) + env(safe-area-inset-bottom) + 16px);
+  z-index: 25;
+  width: 58px; height: 58px;
+  border-radius: 50%;
+  border: 0;
+  background: var(--accent);
+  color: var(--accent-fg);
+  font-size: 32px;
+  line-height: 1;
+  box-shadow: 0 6px 20px rgba(0,0,0,.25);
+}
+.fab[hidden] { display: none; }
+.fab:active { transform: scale(.94); }
+
+/* ==========================================================================
+   3. Bausteine
+   ========================================================================== */
+.muted { color: var(--muted); }
+.small { font-size: 13px; }
+.grow { flex: 1; }
+.sec-title {
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  color: var(--muted);
+  margin: 10px 2px 10px;
+}
+.sec-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  margin: 26px 0 10px;
+  padding: 4px 2px;
+  border: 0;
+  background: none;
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  color: var(--muted);
+  text-align: left;
+}
+.sec-toggle .chev { margin-left: auto; }
+.sec-toggle.open .chev { transform: rotate(90deg); }
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  border-radius: 999px;
+  padding: 9px 15px;
+  font-weight: 600;
+  font-size: 15px;
+  white-space: nowrap;
+}
+.btn.primary { background: var(--accent); color: var(--accent-fg); border-color: transparent; }
+.btn.danger { color: var(--danger); }
+.btn.small { padding: 6px 12px; font-size: 13px; }
+.btn.block { width: 100%; }
+.btn:active:not(:disabled) { transform: scale(.97); }
+
+.input {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  color: var(--text);
+  font: inherit;
+  font-size: 16px; /* < 16px würde auf iOS hineinzoomen */
+}
+.input:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
+select.input { appearance: none; -webkit-appearance: none; padding-right: 34px;
+  background-image: linear-gradient(45deg, transparent 50%, var(--muted) 50%), linear-gradient(135deg, var(--muted) 50%, transparent 50%);
+  background-position: calc(100% - 18px) 50%, calc(100% - 13px) 50%;
+  background-size: 5px 5px; background-repeat: no-repeat; }
+textarea.input { resize: none; line-height: 1.45; }
+.field { display: block; margin-top: 12px; }
+.field > span {
+  display: block;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  margin-bottom: 5px;
+}
+
+.chip { display: inline-flex; align-items: center; gap: 5px; }
+.chip .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--c); flex: none; }
+
+.empty { text-align: center; padding: 34px 16px 20px; color: var(--muted); }
+.empty .big { font-size: 44px; line-height: 1; margin-bottom: 10px; }
+.empty p { margin: 0 0 16px; font-size: 17px; }
+.empty-small { color: var(--muted); text-align: center; padding: 20px 0; margin: 0; }
+
+/* ==========================================================================
+   4. Karten (überall gleich)
+   ========================================================================== */
+.list { display: flex; flex-direction: column; gap: 10px; }
+.card {
+  position: relative;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  scroll-margin-top: 80px;
+  scroll-margin-bottom: calc(var(--tabbar-h) + 90px);
+}
+.card-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 13px 14px;
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.card-main { flex: 1; min-width: 0; }
+.card-title { font-weight: 650; font-size: 17px; overflow-wrap: anywhere; }
+.card-meta { display: flex; flex-wrap: wrap; gap: 4px 12px; margin-top: 3px; font-size: 13px; color: var(--muted); }
+.chev { color: var(--muted); font-size: 22px; line-height: 1; transition: transform .2s; }
+.card.open > .card-head .chev { transform: rotate(90deg); }
+.handle {
+  touch-action: none;
+  cursor: grab;
+  color: var(--muted);
+  padding: 8px 6px;
+  margin: -8px -2px -8px -6px;
+  font-size: 18px;
+  line-height: 1;
+  letter-spacing: -3px;
+}
+.card.dragging { z-index: 5; box-shadow: 0 14px 34px rgba(0,0,0,.28); cursor: grabbing; }
+.list.drag-active .card:not(.dragging) { transition: transform .18s ease; }
+.card-body { padding: 2px 14px 14px; border-top: 1px solid var(--border); animation: bodyIn .22s ease; }
+@keyframes bodyIn { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: none; } }
+.status-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 14px; }
+.status-row .more { margin-left: auto; padding: 8px 13px; }
+.sec { margin-top: 20px; }
+.sec-h { display: flex; align-items: center; justify-content: space-between; gap: 10px; font-weight: 700; margin-bottom: 8px; }
+.notes-view {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: var(--surface-2);
+  min-height: 46px;
+  cursor: text;
+}
+.notes-view.empty { color: var(--muted); }
+textarea.notes-edit { min-height: 92px; display: block; }
+.log { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.log-entry { padding: 9px 12px; border-radius: 10px; background: var(--surface-2); cursor: pointer; }
+.log-date { font-size: 12px; font-weight: 700; color: var(--muted); }
+.log-text { white-space: pre-wrap; overflow-wrap: anywhere; }
+
+/* ==========================================================================
+   5. Hängeregister (Ordner-Tab)
+   ========================================================================== */
+.search { position: relative; margin: 2px 0 14px; }
+.search .input { padding-left: 38px; padding-right: 38px; border-radius: 12px; background: var(--surface); }
+.search .ico { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); opacity: .55; pointer-events: none; }
+.search .clear {
+  position: absolute; right: 6px; top: 50%; transform: translateY(-50%);
+  border: 0; background: none; color: var(--muted); font-size: 18px; padding: 6px 8px;
+}
+.search input::-webkit-search-cancel-button { display: none; }
+
+.cabinet { padding: 4px 0 8px; }
+.folder { --fc: #8b8d98; --fc-fg: #fff; position: relative; scroll-margin-top: 130px; }
+.folder + .folder { margin-top: -10px; }
+.folder-tab {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: stretch;
+  width: max-content;
+  max-width: calc(100% - var(--off));
+  margin-left: var(--off);
+  background: var(--fc);
+  color: var(--fc-fg);
+  border-radius: 12px 12px 0 0;
+  box-shadow: 0 -3px 8px rgba(0,0,0,.08);
+}
+.folder-tab-btn {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  min-width: 0;
+  padding: 9px 14px 7px;
+  border: 0;
+  background: none;
+  color: inherit;
+  font-weight: 700;
+  font-size: 15px;
+}
+.folder-tab-btn .name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.folder-tab .count { font-size: 12px; font-weight: 700; padding: 1px 7px; border-radius: 999px; background: rgba(0,0,0,.16); }
+.folder-more { border: 0; background: none; color: inherit; font-weight: 800; font-size: 18px; padding: 0 12px 0 2px; }
+.folder:not(.open) .folder-more { display: none; }
+.folder-front {
+  position: relative;
+  margin-top: -1px;
+  min-height: 28px;
+  padding: 0 6px;
+  background: var(--fc);
+  border-radius: 12px;
+  box-shadow: 0 -3px 10px rgba(0,0,0,.10);
+}
+.folder.off0 .folder-front { border-top-left-radius: 0; }
+.folder-wrap { display: grid; grid-template-rows: 0fr; transition: grid-template-rows .38s cubic-bezier(.2,.8,.2,1); }
+.folder.open .folder-wrap { grid-template-rows: 1fr; }
+.folder-content { overflow: hidden; min-height: 0; }
+.folder-inner { display: flex; flex-direction: column; gap: 8px; padding: 6px 0 8px; }
+.folder:not(.open) .folder-inner { visibility: hidden; transition: visibility 0s .38s; }
+.folder-inner .card { box-shadow: 0 1px 3px rgba(0,0,0,.12); border-color: transparent; }
+.folder-new {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin: 18px 0 0;
+  padding: 9px 15px;
+  border: 2px dashed var(--border);
+  border-radius: 12px;
+  background: none;
+  color: var(--muted);
+  font-weight: 700;
+}
+
+/* ==========================================================================
+   6. Mehr-Tab
+   ========================================================================== */
+.panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px;
+  margin-bottom: 14px;
+}
+.panel h2 { font-size: 16px; margin: 0 0 10px; }
+.panel p { margin: 0 0 12px; }
+.panel-toggle { display: flex; align-items: center; gap: 8px; width: 100%; border: 0; background: none; padding: 0; font-weight: 700; font-size: 16px; text-align: left; }
+.panel-toggle .chev { margin-left: auto; }
+.panel-toggle.open .chev { transform: rotate(90deg); }
+.acct { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+.acct img { width: 42px; height: 42px; border-radius: 50%; }
+.row { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; padding: 10px 0; border-top: 1px solid var(--border); }
+.row:first-child { border-top: 0; }
+.row-main { flex: 1 1 180px; min-width: 0; }
+.row-title { font-weight: 600; overflow-wrap: anywhere; }
+.btn-row { display: flex; flex-wrap: wrap; gap: 8px; }
+.seg { display: flex; background: var(--surface-2); border-radius: 11px; padding: 3px; }
+.seg button { flex: 1; border: 0; background: none; padding: 8px; border-radius: 8px; font-weight: 600; font-size: 14px; color: var(--muted); }
+.seg button.on { background: var(--surface); color: var(--text); box-shadow: 0 1px 3px rgba(0,0,0,.15); }
+
+/* ==========================================================================
+   7. Sheets, Dialoge, Hinweise
+   ========================================================================== */
+.sheet-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  background: rgba(0,0,0,0);
+  transition: background .2s;
+}
+.sheet-backdrop.show { background: rgba(0,0,0,.42); }
+.sheet {
+  width: 100%;
+  max-width: 560px;
+  max-height: 92dvh;
+  overflow: auto;
+  background: var(--surface);
+  border-radius: 20px 20px 0 0;
+  padding: 8px 18px calc(18px + env(safe-area-inset-bottom));
+  transform: translateY(100%);
+  transition: transform .24s cubic-bezier(.2,.8,.2,1);
+}
+.sheet-backdrop.show .sheet { transform: none; }
+.sheet-grab { width: 38px; height: 5px; border-radius: 3px; background: var(--border); margin: 0 auto 10px; }
+.sheet-title { margin: 4px 0 6px; font-size: 19px; }
+.sheet-text { margin: 6px 0 4px; color: var(--muted); }
+.sheet-actions { display: flex; align-items: center; gap: 8px; margin-top: 18px; }
+.sheet-list { display: flex; flex-direction: column; gap: 6px; margin-top: 6px; }
+.sheet-list .btn { justify-content: flex-start; border-radius: 12px; padding: 13px 16px; font-size: 16px; }
+@media (min-width: 700px) {
+  .sheet-backdrop { align-items: center; }
+  .sheet { border-radius: 20px; padding-bottom: 18px; transform: translateY(24px); opacity: 0; transition: transform .2s, opacity .2s; }
+  .sheet-backdrop.show .sheet { opacity: 1; }
+  .sheet-grab { display: none; }
+}
+.big-input { font-size: 18px; padding: 13px 14px; }
+.swatches { display: flex; flex-wrap: wrap; gap: 10px; }
+.swatch { width: 34px; height: 34px; border-radius: 50%; border: 0; background: var(--c); }
+.swatch.on { outline: 3px solid var(--text); outline-offset: 2px; }
+.emoji-row { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.emoji-row button { width: 38px; height: 38px; border-radius: 10px; border: 1px solid var(--border); background: var(--surface-2); font-size: 19px; padding: 0; }
+.emoji-row button.on { outline: 2px solid var(--accent); }
+.switch-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 16px; font-weight: 600; cursor: pointer; }
+.switch-row input { position: absolute; opacity: 0; pointer-events: none; }
+.switch { position: relative; flex: none; width: 50px; height: 30px; border-radius: 999px; background: var(--border); transition: background .2s; }
+.switch::after { content: ''; position: absolute; top: 3px; left: 3px; width: 24px; height: 24px; border-radius: 50%; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,.3); transition: transform .2s; }
+.switch-row input:checked + .switch { background: var(--accent); }
+.switch-row input:checked + .switch::after { transform: translateX(20px); }
+.switch-row input:focus-visible + .switch { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+#toasts {
+  position: fixed;
+  left: 0; right: 0;
+  bottom: calc(var(--tabbar-h) + env(safe-area-inset-bottom) + 12px);
+  z-index: 60;
+  display: flex;
+  justify-content: center;
+  padding: 0 12px;
+  pointer-events: none;
+}
+.toast {
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  max-width: 560px;
+  width: max-content;
+  padding: 11px 10px 11px 16px;
+  border-radius: 14px;
+  background: #222228;
+  color: #fff;
+  box-shadow: 0 8px 24px rgba(0,0,0,.3);
+  animation: toastIn .22s ease;
+}
+.toast.error { background: #a1262d; }
+.toast.warn { background: #8a5a00; }
+.toast span { flex: 1; }
+.toast button { border: 0; background: none; color: #b4b3ff; font-weight: 700; padding: 4px 8px; white-space: nowrap; }
+@keyframes toastIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+}
+</style>
+</head>
+<body>
+<div class="app" id="app">
+  <header class="topbar"><h1 id="title">Start</h1></header>
+  <main id="view"></main>
+  <button class="fab" id="fab" data-action="capture" aria-label="Neue Idee erfassen">+</button>
+  <nav class="tabbar" aria-label="Navigation">
+    <div class="tabbar-inner">
+      <button class="tab-btn" data-action="tab" data-tab="start"><span class="ico">🏠</span>Start</button>
+      <button class="tab-btn" data-action="tab" data-tab="ordner"><span class="ico">📁</span>Ordner</button>
+      <button class="tab-btn" data-action="tab" data-tab="mehr"><span class="ico">⚙️</span>Mehr</button>
+    </div>
+  </nav>
+</div>
+<div id="toasts" aria-live="polite"></div>
+<div id="modal-root"></div>
+
+<script>
+/* ==========================================================================
+   Firebase-Konfiguration – HIER die echten Werte aus der Firebase-Console eintragen
+   (Projekteinstellungen → Allgemein → Deine Apps → SDK-Konfiguration).
+   Solange die Platzhalter drinstehen, läuft Lifeio im lokalen Modus (ohne Sync).
+   ========================================================================== */
+const FIREBASE_CONFIG = {
+  apiKey: "DEINE_API_KEY",
+  authDomain: "DEIN_PROJEKT.firebaseapp.com",
+  projectId: "DEIN_PROJEKT",
+  storageBucket: "DEIN_PROJEKT.firebasestorage.app",
+  messagingSenderId: "DEINE_SENDER_ID",
+  appId: "DEINE_APP_ID"
+};
+
+(() => {
+'use strict';
+
+/* ==========================================================================
+   1. Konstanten & Helfer
+   ========================================================================== */
+const APP_VERSION = '1.0.0';
+const LS = { data: 'lifeio-data', theme: 'lifeio-theme' };
+const CDN = {
+  fbApp: 'https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js',
+  fbAuth: 'https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js',
+  fbStore: 'https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js'
+};
+const COLLS = ['folders', 'items', 'meta'];
+const UNSORTED = 'unsorted';
+const LEARNED = 'learned';
+const STATUSES = ['idea', 'active', 'paused', 'learned', 'discarded'];
+
+const COLORS = [
+  ['rot', '#e5484d'], ['orange', '#f76b15'], ['gelb', '#f2c200'], ['gruen', '#30a46c'],
+  ['mint', '#2ec4a6'], ['tuerkis', '#0ea5c6'], ['blau', '#3b82f6'], ['indigo', '#5b5bd6'],
+  ['lila', '#9b51e0'], ['pink', '#e93d82'], ['braun', '#a0714f'], ['grau', '#8b8d98']
+];
+const COLOR = Object.fromEntries(COLORS);
+const EMOJIS = ['🎵', '🎸', '🗣️', '🏃', '🧘', '🎨', '📷', '✍️', '💻', '🍳', '📚', '🧠', '🌱', '🛠️', '🎮', '♟️'];
+
+/* Feste Ordner – nur im Code, nicht in der Datenbank */
+const FIXED = {
+  [LEARNED]: { id: LEARNED, name: 'Gelernt', emoji: '✅', color: 'gruen', fixed: true },
+  [UNSORTED]: { id: UNSORTED, name: 'Unsortiert', emoji: '📥', color: 'grau', fixed: true }
+};
+
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const rid = (p = '') => p + Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+const clone = o => JSON.parse(JSON.stringify(o));
+const pad = n => String(n).padStart(2, '0');
+const isISO = s => typeof s === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(s);
+const WD = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'];
+
+function debounce(fn, ms) {
+  let t;
+  const d = (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), ms); };
+  d.now = (...a) => { clearTimeout(t); fn(...a); };
+  return d;
+}
+function todayISO() {
+  const d = new Date();
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+}
+function fmtDay(iso) {
+  if (!isISO(iso)) return '';
+  const [y, m, d] = iso.split('-').map(Number);
+  return `${WD[new Date(y, m - 1, d).getDay()]}, ${pad(d)}.${pad(m)}.${y}`;
+}
+function fmtTs(ms) {
+  const d = new Date(ms || Date.now());
+  return `${pad(d.getDate())}.${pad(d.getMonth() + 1)}.${d.getFullYear()}`;
+}
+/** Text escapen und Links anklickbar machen */
+function linkify(text) {
+  return esc(text).replace(/https?:\/\/[^\s<]+/g, m => {
+    const t = m.match(/[.,!?;:)\]]+$/);
+    const trail = t ? t[0] : '';
+    const url = trail ? m.slice(0, -trail.length) : m;
+    return `<a href="${url}" target="_blank" rel="noopener noreferrer">${url}</a>${trail}`;
+  });
+}
+/** JSON mit sortierten Schlüsseln – zum Vergleichen von Snapshots */
+const stable = v => JSON.stringify(v, (k, x) => x && typeof x === 'object' && !Array.isArray(x)
+  ? Object.keys(x).sort().reduce((o, key) => (o[key] = x[key], o), {}) : x);
+function fgFor(hex) {
+  const n = parseInt(hex.slice(1), 16);
+  const L = (0.2126 * ((n >> 16) & 255) + 0.7152 * ((n >> 8) & 255) + 0.0722 * (n & 255)) / 255;
+  return L > 0.55 ? '#1a1a1a' : '#ffffff';
+}
+function firstGrapheme(v) {
+  v = String(v || '').trim();
+  if (!v) return '';
+  if (window.Intl && Intl.Segmenter) { const s = [...new Intl.Segmenter().segment(v)][0]; return s ? s.segment : ''; }
+  return [...v][0] || '';
+}
+function loadScript(src) {
+  return new Promise((res, rej) => {
+    if ([...document.scripts].some(s => s.src === src)) return res();
+    const s = document.createElement('script');
+    s.src = src;
+    s.onload = res;
+    s.onerror = () => rej(new Error('Laden fehlgeschlagen: ' + src));
+    document.head.appendChild(s);
+  });
+}
+
+/* ==========================================================================
+   2. Hinweise (Toasts), Sheets, Dialoge
+   ========================================================================== */
+let toastTimer = null;
+function toast(msg, type = 'info', { duration = 3000, action } = {}) {
+  const root = $('#toasts');
+  clearTimeout(toastTimer);
+  root.innerHTML = '';
+  const t = document.createElement('div');
+  t.className = 'toast ' + type;
+  t.innerHTML = `<span>${esc(msg)}</span>${action ? `<button type="button">${esc(action.label)}</button>` : ''}`;
+  if (action) t.querySelector('button').addEventListener('click', () => { t.remove(); action.fn(); });
+  root.appendChild(t);
+  toastTimer = setTimeout(() => t.remove(), duration);
+}
+const undoToast = (msg, undo) => toast(msg, 'info', { duration: 5000, action: { label: 'Rückgängig', fn: undo } });
+
+function openSheet({ title, body, onMount }) {
+  const wrap = document.createElement('div');
+  wrap.className = 'sheet-backdrop';
+  wrap.innerHTML = `<div class="sheet" role="dialog" aria-modal="true" aria-label="${esc(title || '')}">
+    <div class="sheet-grab"></div>${title ? `<h3 class="sheet-title">${esc(title)}</h3>` : ''}${body}</div>`;
+  $('#modal-root').appendChild(wrap);
+  const prevFocus = document.activeElement;
+  let closed = false;
+  const onKey = e => { if (e.key === 'Escape') close(); };
+  function close() {
+    if (closed) return;
+    closed = true;
+    wrap.classList.remove('show');
+    wrap.style.pointerEvents = 'none'; // während des Ausblendens keine Klicks mehr abfangen
+    document.removeEventListener('keydown', onKey);
+    setTimeout(() => wrap.remove(), 230);
+    if (prevFocus && prevFocus.focus && document.contains(prevFocus) && !prevFocus.closest('.card')) prevFocus.focus({ preventScroll: true });
+    if (wrap._onClose) wrap._onClose();
+  }
+  wrap.addEventListener('click', e => { if (e.target === wrap) close(); });
+  document.addEventListener('keydown', onKey);
+  requestAnimationFrame(() => wrap.classList.add('show'));
+  if (onMount) onMount($('.sheet', wrap), close, fn => { wrap._onClose = fn; });
+  return close;
+}
+
+function confirmDialog({ title, text, okLabel = 'OK', cancelLabel = 'Abbrechen', danger = false }) {
+  return new Promise(resolve => {
+    let result = false;
+    openSheet({
+      title,
+      body: `<p class="sheet-text">${esc(text)}</p>
+        <div class="sheet-actions"><span class="grow"></span>
+          <button class="btn" data-k="no">${esc(cancelLabel)}</button>
+          <button class="btn primary ${danger ? 'danger-bg' : ''}" data-k="yes" ${danger ? 'style="background:var(--danger);color:#fff"' : ''}>${esc(okLabel)}</button>
+        </div>`,
+      onMount(sheet, close, onClose) {
+        onClose(() => resolve(result));
+        sheet.querySelector('[data-k=no]').addEventListener('click', close);
+        sheet.querySelector('[data-k=yes]').addEventListener('click', () => { result = true; close(); });
+        sheet.querySelector('[data-k=yes]').focus();
+      }
+    });
+  });
+}
+
+/** Auswahl-Liste von unten; liefert den key der Auswahl oder null */
+function actionSheet(title, options) {
+  return new Promise(resolve => {
+    let result = null;
+    openSheet({
+      title,
+      body: `<div class="sheet-list">${options.map(o =>
+        `<button class="btn ${o.danger ? 'danger' : ''}" data-k="${esc(o.key)}" ${o.disabled ? 'disabled' : ''}>${esc(o.label)}</button>`).join('')}
+        <button class="btn" data-k="">Abbrechen</button></div>`,
+      onMount(sheet, close, onClose) {
+        onClose(() => resolve(result));
+        sheet.addEventListener('click', e => {
+          const b = e.target.closest('[data-k]');
+          if (!b) return;
+          result = b.dataset.k || null;
+          close();
+        });
+      }
+    });
+  });
+}
+
+/* ==========================================================================
+   3. Store – In-Memory + localStorage + Firestore (Realtime)
+   Writes landen sofort lokal; Firestore synchronisiert im Hintergrund
+   (mit enablePersistence auch offline).
+   ========================================================================== */
+const Store = (() => {
+  const data = { folders: {}, items: {}, meta: {} };
+  const listeners = new Set();
+  const syncListeners = new Set();
+  let owner = 'local';        // 'local' (Gast) oder Firebase-UID
+  let cloudInit = false;      // Erst-Abgleich mit dem Konto erledigt?
+  let mergePending = false;   // Gast-Daten warten noch auf den Upload
+  let queue = [];             // Ops, die gemacht wurden, während Firebase nicht verbunden war
+  let uid = null, db = null;
+  let unsubs = [];
+  let serverSeen = {};
+  let pendingWrites = 0;
+  let pendingInit = false;
+  let askMergeFn = null;
+  let loud = false, flushTimer = null;
+
+  /* ---------- lokal ---------- */
+  function loadLocal() {
+    try {
+      const raw = localStorage.getItem(LS.data);
+      if (!raw) return;
+      const o = JSON.parse(raw);
+      owner = o.owner || 'local';
+      cloudInit = !!o.cloudInit;
+      mergePending = !!o.mergePending;
+      queue = Array.isArray(o.queue) ? o.queue : [];
+      for (const c of COLLS) if (o.colls && o.colls[c]) data[c] = o.colls[c];
+    } catch (e) { console.warn('Lokaler Speicher defekt – wird neu aufgebaut', e); }
+  }
+  let quotaWarned = false;
+  const saveLocal = debounce(() => {
+    try {
+      localStorage.setItem(LS.data, JSON.stringify({ owner, cloudInit, mergePending, queue, savedAt: Date.now(), colls: data }));
+    } catch (e) {
+      console.error(e);
+      if (!quotaWarned) { quotaWarned = true; toast('Lokaler Speicher voll – bitte ein Backup machen', 'error'); }
+    }
+  }, 300);
+
+  /** loud = Ansicht neu zeichnen; leise Änderungen (Tippen in Notizen) nur speichern */
+  function changed(isLoud) {
+    if (isLoud) loud = true;
+    if (!flushTimer) flushTimer = setTimeout(flush, 0);
+  }
+  function flush() {
+    flushTimer = null;
+    saveLocal();
+    if (!loud) return;
+    loud = false;
+    listeners.forEach(cb => { try { cb(); } catch (e) { console.error(e); } });
+  }
+
+  /* ---------- Firestore-Helfer ---------- */
+  const ref = c => db.collection('users').doc(uid).collection(c);
+  function toRemote(doc) {
+    const o = JSON.parse(JSON.stringify(doc)); // entfernt undefined (mag Firestore nicht)
+    delete o.id;
+    return o;
+  }
+  const online = () => !!(uid && db);
+  function track(p) {
+    pendingWrites++;
+    emitSync();
+    p.catch(fsError).finally(() => { pendingWrites--; emitSync(); });
+  }
+  function emitSync() { const s = syncState(); syncListeners.forEach(cb => cb(s)); }
+  function syncState() {
+    if (!uid) return owner !== 'local' ? 'offline' : 'local';
+    if (!navigator.onLine) return 'offline';
+    return pendingWrites > 0 ? 'pending' : 'synced';
+  }
+  function enqueue(op) {
+    // Cache gehört einem Konto, Firebase ist aber (noch) nicht verbunden → später nachholen
+    if (owner !== 'local' && !uid) queue.push(op);
+  }
+
+  /* ---------- öffentliche API ---------- */
+  function put(coll, id, doc, opts = {}) {
+    const prev = data[coll][id];
+    const next = opts.replace || !prev ? { ...doc, id } : { ...prev, ...doc, id };
+    data[coll][id] = next;
+    changed(!opts.silent);
+    if (online()) { try { track(ref(coll).doc(id).set(toRemote(next), { merge: !opts.replace })); } catch (e) { fsError(e); } }
+    else enqueue({ t: 'put', c: coll, id });
+    return next;
+  }
+  function del(coll, id) {
+    delete data[coll][id];
+    changed(true);
+    if (online()) { try { track(ref(coll).doc(id).delete()); } catch (e) { fsError(e); } }
+    else enqueue({ t: 'del', c: coll, id });
+  }
+  /** Mehrere Writes – lokal sofort, remote in Firestore-Batches */
+  async function batch(ops) {
+    for (const op of ops) {
+      if (op.type === 'put') {
+        const prev = data[op.coll][op.id];
+        data[op.coll][op.id] = op.replace || !prev ? { ...op.doc, id: op.id } : { ...prev, ...op.doc, id: op.id };
+      } else delete data[op.coll][op.id];
+    }
+    changed(true);
+    if (!online()) { ops.forEach(op => enqueue({ t: op.type === 'put' ? 'put' : 'del', c: op.coll, id: op.id })); return; }
+    await remoteBatch(ops.map(op => ({ type: op.type, coll: op.coll, id: op.id, replace: op.replace })));
+  }
+  /** Ops in Firestore-Batches (max. 450 je Batch). Liefert false, wenn etwas schiefging. */
+  async function remoteBatch(ops, { wait = 5000 } = {}) {
+    let ok = true;
+    for (let i = 0; i < ops.length; i += 450) {
+      const b = db.batch();
+      for (const op of ops.slice(i, i + 450)) {
+        const r = ref(op.coll).doc(op.id);
+        const doc = data[op.coll][op.id];
+        try {
+          if (op.type === 'put') { if (doc) b.set(r, toRemote(doc), { merge: !op.replace }); }
+          else b.delete(r);
+        } catch (e) { console.error('[Firestore] übersprungen', op, e); ok = false; }
+      }
+      const p = b.commit();
+      track(p);
+      p.catch(() => { ok = false; });
+      // Offline löst commit() erst nach dem Server-Ack auf → nicht ewig blockieren
+      if (navigator.onLine) await Promise.race([p.catch(() => {}), sleep(wait)]);
+    }
+    return ok;
+  }
+  const all = coll => Object.values(data[coll]);
+  const raw = (coll, id) => data[coll][id] || null;
+  function subscribe(cb) { listeners.add(cb); return () => listeners.delete(cb); }
+  function settings() { return { theme: 'auto', ...(data.meta.settings || {}) }; }
+  function saveSettings(patch) {
+    const next = { ...settings(), ...patch };
+    delete next.id;
+    return put('meta', 'settings', next);
+  }
+  function resetData() {
+    data.folders = {};
+    data.items = {};
+    data.meta = data.meta.settings ? { settings: data.meta.settings } : {};
+    queue = [];
+    changed(true);
+  }
+  const hasUserData = () => Object.keys(data.items).length > 0 || Object.keys(data.folders).length > 0;
+
+  /* ---------- Firebase verbinden / trennen ---------- */
+  async function attach(userId, { askMerge } = {}) {
+    detachListeners();
+    askMergeFn = askMerge || null;
+    const guest = owner === 'local' || (owner === userId && mergePending);
+    if (owner !== 'local' && owner !== userId) { resetData(); cloudInit = false; mergePending = false; }
+    if (owner === 'local') cloudInit = false;
+    uid = userId;
+    db = firebase.firestore();
+    serverSeen = {};
+    // Offline gesammelte Ops nachholen (nur wenn der Cache diesem Konto gehört)
+    if (owner === userId && queue.length && cloudInit) {
+      const ops = queue.map(q => ({ type: q.t === 'put' ? 'put' : 'del', coll: q.c, id: q.id }));
+      queue = [];
+      await remoteBatch(ops).catch(fsError);
+    }
+    if (!cloudInit) await initialSync(guest, askMerge);
+    owner = userId;
+    saveLocal();
+    if (cloudInit) subscribeAll();
+    emitSync();
+  }
+  function subscribeAll() {
+    detachListeners();
+    for (const c of COLLS) unsubs.push(ref(c).onSnapshot(snap => onSnap(c, snap), err => fsError(err)));
+  }
+  /** Erster Abgleich mit dem Konto. Lokale Daten werden erst ersetzt, wenn der Upload sicher geklappt hat. */
+  async function initialSync(guest, askMerge) {
+    try {
+      await Promise.all(['items', 'folders'].map(c => ref(c).limit(1).get({ source: 'server' })));
+    } catch (e) {
+      console.warn('Server nicht erreichbar – Erst-Abgleich folgt, sobald online', e);
+      if (e && e.code === 'permission-denied') fsError(e);
+      pendingInit = true;
+      mergePending = guest;
+      return;
+    }
+    if (guest && hasUserData()) {
+      if (askMerge && await askMerge()) {
+        const ops = [];
+        for (const c of ['folders', 'items']) for (const id of Object.keys(data[c])) ops.push({ type: 'put', coll: c, id });
+        if (!await remoteBatch(ops, { wait: 20000 })) {
+          pendingInit = true;
+          mergePending = guest;
+          toast('Hochladen ins Konto hat nicht geklappt – deine Daten bleiben auf diesem Gerät, neuer Versuch beim nächsten Start.', 'error', { duration: 6000 });
+          return;
+        }
+      } else resetData();
+    }
+    pendingInit = false;
+    mergePending = false;
+    cloudInit = true;
+  }
+  function onSnap(c, snap) {
+    // Leerer Cache-Snapshot beim allerersten Start würde lokale Daten kurz löschen → ignorieren
+    if (snap.metadata.fromCache && snap.empty && !serverSeen[c] && Object.keys(data[c]).length) return;
+    const firstServer = !snap.metadata.fromCache && !serverSeen[c];
+    if (!snap.metadata.fromCache) serverSeen[c] = true;
+    const next = {};
+    snap.forEach(d => { next[d.id] = { ...d.data(), id: d.id }; });
+    // Konto hat noch keine Einstellungen → die lokalen behalten und hochladen
+    if (c === 'meta' && firstServer && !next.settings && data.meta.settings) {
+      next.settings = data.meta.settings;
+      setTimeout(() => put('meta', 'settings', data.meta.settings), 0);
+    }
+    const same = stable(next) === stable(data[c]);
+    data[c] = next;
+    changed(!same);
+  }
+  function detachListeners() { unsubs.forEach(u => { try { u(); } catch (e) {} }); unsubs = []; }
+  function detach() {
+    detachListeners();
+    uid = null; db = null; owner = 'local'; cloudInit = false; mergePending = false; pendingInit = false;
+    resetData();
+    saveLocal.now();
+    emitSync();
+  }
+  async function retryInit() {
+    if (!online() || !pendingInit) return;
+    await initialSync(mergePending, askMergeFn);
+    saveLocal();
+    if (cloudInit) { subscribeAll(); emitSync(); }
+  }
+  function boot() {
+    loadLocal();
+    window.addEventListener('online', () => { emitSync(); retryInit(); });
+    window.addEventListener('offline', emitSync);
+  }
+
+  return {
+    boot, put, del, batch, all, raw, subscribe, settings, saveSettings,
+    attach, detach, hasUserData, syncState, emitSync,
+    saveNow: () => saveLocal.now(),
+    onSync: cb => { syncListeners.add(cb); return () => syncListeners.delete(cb); },
+    owner: () => owner
+  };
+})();
+
+let lastFsErr = 0;
+function fsError(e) {
+  console.error('[Firestore]', e);
+  if (Date.now() - lastFsErr < 4000) return;
+  lastFsErr = Date.now();
+  const msg = e && e.code === 'permission-denied'
+    ? 'Keine Berechtigung – Firestore-Regeln prüfen (siehe README)'
+    : (e && e.message) || String(e);
+  toast('Sync-Fehler: ' + msg, 'error');
+}
+
+/* ==========================================================================
+   4. Auth (Google-Login) & Firebase-Initialisierung
+   ========================================================================== */
+const Auth = (() => {
+  let user = null;
+  let enabled = false;
+  let status = 'init'; // init | unconfigured | ready | failed
+  const configured = () => {
+    const k = String(FIREBASE_CONFIG.apiKey || '');
+    return !!k && !k.startsWith('DEINE') && !String(FIREBASE_CONFIG.projectId || '').startsWith('DEIN');
+  };
+  const isIOS = () => /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+
+  async function init() {
+    if (!configured()) { status = 'unconfigured'; Store.emitSync(); return; }
+    try {
+      await loadScript(CDN.fbApp);
+      await Promise.all([loadScript(CDN.fbAuth), loadScript(CDN.fbStore)]);
+    } catch (e) {
+      status = 'failed';
+      Store.emitSync();
+      toast('Firebase nicht erreichbar – lokaler Modus, Sync folgt beim nächsten Start', 'warn');
+      return;
+    }
+    try {
+      if (!firebase.apps.length) firebase.initializeApp(FIREBASE_CONFIG);
+      const db = firebase.firestore();
+      try { await db.enablePersistence({ synchronizeTabs: true }); }
+      catch (e) { console.warn('Offline-Persistence nicht verfügbar:', e.code || e); }
+      enabled = true;
+      status = 'ready';
+      firebase.auth().getRedirectResult().catch(e => toast(authMsg(e), 'error'));
+      firebase.auth().onAuthStateChanged(onUser);
+    } catch (e) {
+      status = 'failed';
+      toast('Firebase-Fehler: ' + e.message, 'error');
+    }
+    Store.emitSync();
+  }
+  async function onUser(u) {
+    if (u) {
+      user = { uid: u.uid, name: u.displayName || '', email: u.email || '', photo: u.photoURL || '' };
+      try { await Store.attach(u.uid, { askMerge }); } catch (e) { fsError(e); }
+    } else {
+      const had = !!user || Store.owner() !== 'local';
+      user = null;
+      if (had) Store.detach();
+    }
+    scheduleRender();
+  }
+  function askMerge() {
+    const n = Store.all('items').length;
+    const f = Store.all('folders').length;
+    return confirmDialog({
+      title: 'Lokale Daten übernehmen?',
+      text: `Du hast ohne Konto ${n} ${n === 1 ? 'Eintrag' : 'Einträge'} und ${f} Ordner angelegt. Sollen sie in dein Google-Konto übernommen werden? Sonst werden sie auf diesem Gerät verworfen.`,
+      okLabel: 'Übernehmen', cancelLabel: 'Verwerfen'
+    });
+  }
+  async function signIn() {
+    if (!configured()) { toast('Firebase ist noch nicht eingerichtet – siehe README', 'warn'); return; }
+    if (!enabled) { toast('Firebase lädt noch oder ist offline', 'warn'); return; }
+    const provider = new firebase.auth.GoogleAuthProvider();
+    provider.setCustomParameters({ prompt: 'select_account' });
+    try {
+      await firebase.auth().signInWithPopup(provider);
+    } catch (e) {
+      const cancelled = ['auth/popup-closed-by-user', 'auth/cancelled-popup-request', 'auth/user-cancelled'].includes(e.code);
+      const fallback = ['auth/popup-blocked', 'auth/operation-not-supported-in-this-environment', 'auth/web-storage-unsupported', 'auth/internal-error'].includes(e.code);
+      if (!cancelled && (fallback || isIOS())) {
+        // iOS-Safari / Standalone-PWA: Popup scheitert oft → Redirect
+        try { await firebase.auth().signInWithRedirect(provider); }
+        catch (e2) { toast(authMsg(e2), 'error'); }
+      } else if (!cancelled) toast(authMsg(e), 'error');
+    }
+  }
+  async function signOut() {
+    const ok = await confirmDialog({
+      title: 'Abmelden?',
+      text: 'Deine Daten bleiben im Konto. Die lokale Kopie auf diesem Gerät wird entfernt.',
+      okLabel: 'Abmelden', danger: true
+    });
+    if (!ok) return;
+    try { await firebase.auth().signOut(); toast('Abgemeldet'); }
+    catch (e) { toast(authMsg(e), 'error'); }
+  }
+  function authMsg(e) {
+    const map = {
+      'auth/unauthorized-domain': 'Diese Domain ist in Firebase nicht autorisiert (Authentication → Settings → Authorized domains).',
+      'auth/network-request-failed': 'Keine Verbindung – bitte später erneut versuchen.',
+      'auth/popup-blocked': 'Popup wurde blockiert.',
+      'auth/operation-not-allowed': 'Google-Login ist in Firebase nicht aktiviert.'
+    };
+    return 'Login-Fehler: ' + (map[e && e.code] || (e && e.message) || e);
+  }
+  return { init, signIn, signOut, configured, user: () => user, status: () => status };
+})();
+
+/* ==========================================================================
+   5. Daten-Abfragen
+   ========================================================================== */
+const byNewest = (a, b) => (b.createdAt || 0) - (a.createdAt || 0);
+const byChanged = (a, b) => (b.statusChangedAt || 0) - (a.statusChangedAt || 0);
+
+const Data = {
+  /** eigene Ordner in manueller Reihenfolge */
+  folders: () => Store.all('folders').sort((a, b) => (a.order || 0) - (b.order || 0) || (a.createdAt || 0) - (b.createdAt || 0)),
+  folder: id => FIXED[id] || Store.raw('folders', id),
+  /** Ursprungsordner eines Dings – fällt auf Unsortiert zurück, wenn der Ordner fehlt */
+  originId(it) {
+    const f = it && it.folderId;
+    return f && (f === UNSORTED || (f !== LEARNED && Store.raw('folders', f))) ? f : UNSORTED;
+  },
+  origin: it => Data.folder(Data.originId(it)),
+  items: st => Store.all('items').filter(i => i.status === st),
+  ideasIn: fid => Data.items('idea').filter(i => Data.originId(i) === fid).sort(byNewest),
+  active: () => Data.items('active').sort((a, b) => (a.activeOrder || 0) - (b.activeOrder || 0) || (a.statusChangedAt || 0) - (b.statusChangedAt || 0)),
+  paused: () => Data.items('paused').sort(byChanged),
+  learned: () => Data.items('learned').sort(byChanged),
+  discarded: () => Data.items('discarded').sort(byChanged),
+  maxActiveOrder: () => Math.max(0, ...Data.items('active').map(i => i.activeOrder || 0))
+};
+const folderLabel = f => `${f.emoji ? f.emoji + ' ' : ''}${f.name}`;
+const chipHTML = f => `<span class="chip" style="--c:${COLOR[f.color] || COLOR.grau}"><span class="dot"></span>${esc(folderLabel(f))}</span>`;
+
+/* ==========================================================================
+   6. Aktionen (Änderungen an Daten)
+   ========================================================================== */
+const Act = {
+  create({ title, folderId, active }) {
+    const now = Date.now();
+    const id = rid('i_');
+    Store.put('items', id, {
+      title, folderId, status: active ? 'active' : 'idea', notes: '', log: [],
+      activeOrder: active ? Data.maxActiveOrder() + 1 : 0,
+      createdAt: now, updatedAt: now, statusChangedAt: now
+    });
+    return id;
+  },
+  /** Statuswechsel mit Rückgängig-Hinweis */
+  setStatus(id, status, msg) {
+    const it = Store.raw('items', id);
+    if (!it) return;
+    const prev = clone(it);
+    const now = Date.now();
+    const patch = { status, statusChangedAt: now, updatedAt: now };
+    if (status === 'active') patch.activeOrder = Data.maxActiveOrder() + 1;
+    Store.put('items', id, patch);
+    undoToast(msg(it), () => Store.put('items', id, prev, { replace: true }));
+  },
+  activate: id => Act.setStatus(id, 'active', it => `🔥 „${it.title}“ ist jetzt auf Start`),
+  pause: id => Act.setStatus(id, 'paused', it => `⏸️ „${it.title}“ pausiert`),
+  resume: id => Act.setStatus(id, 'active', it => `🔥 Weiter geht's mit „${it.title}“`),
+  learned: id => Act.setStatus(id, 'learned', it => `✅ „${it.title}“ gelernt – liegt jetzt in Gelernt`),
+  relearn: id => Act.setStatus(id, 'active', it => `🔁 „${it.title}“ ist wieder auf Start`),
+  toIdea: id => Act.setStatus(id, 'idea', it => `💡 „${it.title}“ liegt wieder in ${folderLabel(Data.origin(it))}`),
+  discard: id => Act.setStatus(id, 'discarded', it => `🗑️ „${it.title}“ verworfen`),
+  restore: id => Act.setStatus(id, 'idea', it => `💡 „${it.title}“ wiederhergestellt in ${folderLabel(Data.origin(it))}`),
+  async purge(id) {
+    const it = Store.raw('items', id);
+    if (!it) return;
+    const ok = await confirmDialog({
+      title: 'Endgültig löschen?',
+      text: `„${it.title}“ wird mit Notizen und Logbuch gelöscht. Das lässt sich nicht rückgängig machen.`,
+      okLabel: 'Endgültig löschen', danger: true
+    });
+    if (!ok) return;
+    Store.del('items', id);
+    toast('Gelöscht');
+  },
+  setTitle(id, title) {
+    Store.put('items', id, { title, updatedAt: Date.now() }, { silent: true });
+  },
+  setFolder(id, folderId) {
+    Store.put('items', id, { folderId, updatedAt: Date.now() });
+  },
+  saveLog(id, entry) {
+    const it = Store.raw('items', id);
+    if (!it) return;
+    const log = (it.log || []).filter(e => e.id !== entry.id);
+    log.push(entry);
+    Store.put('items', id, { log, updatedAt: Date.now() });
+  },
+  deleteLog(id, logId) {
+    const it = Store.raw('items', id);
+    if (!it) return;
+    const prevLog = clone(it.log || []);
+    Store.put('items', id, { log: prevLog.filter(e => e.id !== logId), updatedAt: Date.now() });
+    undoToast('Logbuch-Eintrag gelöscht', () => Store.put('items', id, { log: prevLog }));
+  },
+  reorderActive(ids) {
+    Store.batch(ids.map((id, i) => ({ type: 'put', coll: 'items', id, doc: { activeOrder: i + 1 } })));
+  },
+  createFolder({ name, emoji, color }) {
+    const id = rid('f_');
+    const order = Math.max(0, ...Store.all('folders').map(f => f.order || 0)) + 1;
+    Store.put('folders', id, { name, emoji, color, order, createdAt: Date.now() });
+    return id;
+  },
+  moveFolder(id, dir) {
+    const list = Data.folders();
+    const i = list.findIndex(f => f.id === id);
+    const j = i + dir;
+    if (i < 0 || j < 0 || j >= list.length) return;
+    [list[i], list[j]] = [list[j], list[i]];
+    Store.batch(list.map((f, k) => ({ type: 'put', coll: 'folders', id: f.id, doc: { order: k + 1 } })));
+  },
+  async deleteFolder(id) {
+    const f = Store.raw('folders', id);
+    if (!f) return;
+    const n = Data.ideasIn(id).length;
+    const ok = await confirmDialog({
+      title: `Ordner „${f.name}“ löschen?`,
+      text: n ? `${n} ${n === 1 ? 'Idee wandert' : 'Ideen wandern'} nach 📥 Unsortiert.` : 'Der Ordner ist leer.',
+      okLabel: 'Ordner löschen', danger: true
+    });
+    if (!ok) return;
+    // Alles, was sich diesen Ordner merkt, merkt sich ab jetzt Unsortiert
+    const ops = Store.all('items').filter(i => i.folderId === id)
+      .map(i => ({ type: 'put', coll: 'items', id: i.id, doc: { folderId: UNSORTED } }));
+    ops.push({ type: 'del', coll: 'folders', id });
+    if (App.openFolder === id) App.openFolder = null;
+    Store.batch(ops);
+    toast('Ordner gelöscht');
+  }
+};
+
+/* Notizen speichern ca. 600 ms nach dem letzten Tippen (und beim Verlassen) */
+const NotesSaver = (() => {
+  const pending = new Map();
+  function save(id) {
+    const p = pending.get(id);
+    if (!p) return;
+    clearTimeout(p.timer);
+    pending.delete(id);
+    const it = Store.raw('items', id);
+    if (it && it.notes !== p.value) Store.put('items', id, { notes: p.value, updatedAt: Date.now() }, { silent: true });
+  }
+  return {
+    schedule(id, value) {
+      const p = pending.get(id);
+      if (p) clearTimeout(p.timer);
+      pending.set(id, { value, timer: setTimeout(() => save(id), 600) });
+    },
+    flush: save,
+    flushAll() { [...pending.keys()].forEach(save); }
+  };
+})();
+
+/* ==========================================================================
+   7. App-Zustand & Rendern
+   ========================================================================== */
+const App = {
+  tab: 'start',
+  openItem: null,       // aufgeklappte Karte
+  openFolder: null,     // geöffneter Ordner im Hängeregister
+  query: '',            // Suche im Ordner-Tab
+  pausedOpen: false,
+  discardedOpen: false,
+  editingNotes: null,   // Ding, dessen Notizzettel gerade bearbeitet wird
+  renderedTab: null
+};
+const TITLES = { start: 'Start', ordner: 'Ordner', mehr: 'Mehr' };
+
+let renderQueued = false;
+let renderPending = false;
+/** Tippt der Nutzer gerade in einem Feld der Ansicht? Dann nicht neu zeichnen. */
+function isTyping() {
+  const a = document.activeElement;
+  return !!(a && a.closest && a.closest('#view') && a.matches('textarea, input:not([type=search]):not([type=checkbox])'));
+}
+function scheduleRender() {
+  if (renderQueued) return;
+  renderQueued = true;
+  // setTimeout statt requestAnimationFrame: läuft auch, wenn der Tab im Hintergrund ist
+  setTimeout(() => {
+    renderQueued = false;
+    if (isTyping()) { renderPending = true; return; }
+    render();
+  }, 0);
+}
+document.addEventListener('focusout', () => {
+  if (!renderPending) return;
+  // kurz warten, damit ein gerade angetippter Knopf seinen Klick noch bekommt
+  setTimeout(() => { if (renderPending && !isTyping()) { renderPending = false; render(); } }, 260);
+});
+
+function render() {
+  renderPending = false;
+  const view = $('#view');
+  if (App.renderedTab !== App.tab) {
+    view.innerHTML = '';
+    App.renderedTab = App.tab;
+    window.scrollTo(0, 0);
+  }
+  $('#title').textContent = TITLES[App.tab];
+  $$('.tab-btn').forEach(b => {
+    const on = b.dataset.tab === App.tab;
+    b.classList.toggle('active', on);
+    if (on) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current');
+  });
+  $('#fab').hidden = App.tab === 'mehr';
+  ({ start: viewStart, ordner: viewOrdner, mehr: viewMehr })[App.tab](view);
+}
+
+/* ---------- Karten ---------- */
+const STATUS_BUTTONS = {
+  idea: [['activate', '▶ Jetzt lernen', true]],
+  active: [['pause', '⏸️ Pausieren'], ['learned', '✅ Gelernt'], ['to-idea', '↩️ Zurück zu Ideen']],
+  paused: [['resume', '▶ Weiterlernen', true], ['learned', '✅ Gelernt'], ['to-idea', '↩️ Zurück zu Ideen']],
+  learned: [['relearn', '🔁 Nochmal lernen', true]]
+};
+
+function cardHTML(it, { chip = true, handle = false } = {}) {
+  const open = App.openItem === it.id;
+  const meta = [];
+  if (chip) meta.push(chipHTML(Data.origin(it)));
+  if (it.status === 'learned') meta.push(`<span>gelernt am ${fmtTs(it.statusChangedAt)}</span>`);
+  return `<article class="card ${open ? 'open' : ''}" data-id="${it.id}">
+    <div class="card-head" data-action="toggle-card" data-id="${it.id}" role="button" tabindex="0" aria-expanded="${open}">
+      ${handle ? '<span class="handle" aria-label="Zum Umsortieren ziehen" title="Ziehen zum Umsortieren">⋮⋮</span>' : ''}
+      <div class="card-main">
+        <div class="card-title">${esc(it.title)}</div>
+        ${meta.length ? `<div class="card-meta">${meta.join('')}</div>` : ''}
+      </div>
+      <span class="chev" aria-hidden="true">›</span>
+    </div>
+    ${open ? cardBodyHTML(it) : ''}
+  </article>`;
+}
+
+function cardBodyHTML(it) {
+  const isIdea = it.status === 'idea';
+  const folderOpts = [FIXED[UNSORTED], ...Data.folders()]
+    .map(f => `<option value="${f.id}" ${Data.originId(it) === f.id ? 'selected' : ''}>${esc(folderLabel(f))}</option>`).join('');
+  const buttons = (STATUS_BUTTONS[it.status] || []).map(([act, label, primary]) =>
+    `<button class="btn ${primary ? 'primary' : ''}" data-action="${act}" data-id="${it.id}">${label}</button>`).join('');
+  const log = [...(it.log || [])].sort((a, b) => (b.date || '').localeCompare(a.date || '') || (b.createdAt || 0) - (a.createdAt || 0));
+  const showLog = !isIdea || log.length > 0;
+  return `<div class="card-body">
+    <label class="field"><span>Titel</span>
+      <input class="input f-title" data-id="${it.id}" value="${esc(it.title)}" maxlength="120" enterkeyhint="done"></label>
+    <label class="field"><span>${isIdea ? 'Ordner' : 'Ursprungsordner'}</span>
+      <select class="input f-folder" data-id="${it.id}">${folderOpts}</select></label>
+    <div class="status-row">${buttons}
+      <button class="btn more" data-action="card-more" data-id="${it.id}" aria-label="Weitere Aktionen">⋯</button></div>
+    <div class="sec">
+      <div class="sec-h"><span>📝 Notizzettel</span></div>
+      ${App.editingNotes === it.id ? notesEditHTML(it) : notesViewHTML(it)}
+    </div>
+    ${showLog ? `<div class="sec">
+      <div class="sec-h"><span>📖 Logbuch</span>
+        <button class="btn small" data-action="add-log" data-id="${it.id}">+ Eintrag</button></div>
+      ${log.length ? `<ul class="log">${log.map(e => `<li class="log-entry" data-action="edit-log" data-id="${it.id}" data-log="${esc(e.id)}">
+          <div class="log-date">${fmtDay(e.date)}</div><div class="log-text">${linkify(e.text)}</div></li>`).join('')}</ul>`
+        : '<p class="muted small" style="margin:0">Noch keine Einträge.</p>'}
+    </div>` : ''}
+  </div>`;
+}
+const notesViewHTML = it => it.notes
+  ? `<div class="notes-view" data-action="edit-notes" data-id="${it.id}">${linkify(it.notes)}</div>`
+  : `<div class="notes-view empty" data-action="edit-notes" data-id="${it.id}">Tippe, um Notizen zu schreiben – Links, Tipps, Wissen …</div>`;
+const notesEditHTML = it => `<textarea class="input notes-edit" data-id="${it.id}" placeholder="Links, Tipps, Wissen …">${esc(it.notes || '')}</textarea>`;
+function autosize(ta) { ta.style.height = 'auto'; ta.style.height = Math.max(92, ta.scrollHeight + 2) + 'px'; }
+
+/* ---------- Tab: Start ---------- */
+function viewStart(view) {
+  const act = Data.active();
+  const pau = Data.paused();
+  let h = '<h2 class="sec-title">Gerade am Lernen</h2>';
+  if (!act.length) {
+    h += `<div class="empty"><div class="big">🌱</div><p>Du lernst gerade nichts.</p>
+      <button class="btn primary" data-action="goto-ordner">📁 Schau in deine Ideen</button></div>`;
+  } else {
+    h += `<div class="list" data-list="active">${act.map(it => cardHTML(it, { handle: act.length > 1 })).join('')}</div>`;
+  }
+  if (pau.length) {
+    h += `<button class="sec-toggle ${App.pausedOpen ? 'open' : ''}" data-action="toggle-paused" aria-expanded="${App.pausedOpen}">
+      ⏸️ Pausiert (${pau.length})<span class="chev" aria-hidden="true">›</span></button>`;
+    if (App.pausedOpen) h += `<div class="list">${pau.map(it => cardHTML(it)).join('')}</div>`;
+  }
+  view.innerHTML = h;
+}
+
+/* ---------- Tab: Ordner (Hängeregister) ---------- */
+function viewOrdner(view) {
+  if (!$('#search', view)) {
+    view.innerHTML = `<div class="search">
+        <span class="ico" aria-hidden="true">🔍</span>
+        <input id="search" class="input" type="search" placeholder="Ideen durchsuchen …" autocomplete="off" enterkeyhint="search" aria-label="Ideen durchsuchen">
+        <button class="clear" data-action="clear-search" aria-label="Suche leeren" hidden>✕</button>
+      </div><div id="cabinet"></div>`;
+    $('#search', view).value = App.query;
+  }
+  renderCabinet();
+}
+function renderCabinet() {
+  const box = $('#cabinet');
+  if (!box) return;
+  $('.search .clear').hidden = !App.query;
+  const q = App.query.trim().toLowerCase();
+  if (q) {
+    const res = Data.items('idea').filter(i => i.title.toLowerCase().includes(q)).sort(byNewest);
+    box.innerHTML = res.length
+      ? `<div class="list">${res.map(it => cardHTML(it)).join('')}</div>`
+      : '<p class="empty-small">Keine Idee gefunden.</p>';
+    return;
+  }
+  const folders = [FIXED[LEARNED], FIXED[UNSORTED], ...Data.folders()];
+  box.innerHTML = `<div class="cabinet">${folders.map((f, i) => {
+    const items = f.id === LEARNED ? Data.learned() : Data.ideasIn(f.id);
+    const hex = COLOR[f.color] || COLOR.grau;
+    const off = (i % 3) * 24;
+    return `<section class="folder ${App.openFolder === f.id ? 'open' : ''} ${off ? '' : 'off0'}" data-folder="${f.id}"
+        style="--fc:${hex};--fc-fg:${fgFor(hex)};--off:${off}%">
+      <div class="folder-tab">
+        <button class="folder-tab-btn" data-action="toggle-folder" data-id="${f.id}" aria-expanded="${App.openFolder === f.id}">
+          ${f.emoji ? `<span>${esc(f.emoji)}</span>` : ''}<span class="name">${esc(f.name)}</span><span class="count">${items.length}</span>
+        </button>
+        ${f.fixed ? '' : `<button class="folder-more" data-action="folder-menu" data-id="${f.id}" aria-label="Ordner bearbeiten">⋯</button>`}
+      </div>
+      <div class="folder-front"><div class="folder-wrap"><div class="folder-content"><div class="folder-inner">
+        ${items.map(it => cardHTML(it, { chip: f.id === LEARNED })).join('')}
+      </div></div></div></div>
+    </section>`;
+  }).join('')}
+    <button class="folder-new" data-action="new-folder">+ Neuer Ordner</button>
+  </div>`;
+}
+
+/* ---------- Tab: Mehr ---------- */
+function viewMehr(view) {
+  const u = Auth.user();
+  const st = Store.syncState();
+  const SYNC = {
+    synced: '☁️ Synchronisiert',
+    pending: '⏳ Wird synchronisiert …',
+    offline: '📴 Offline – Änderungen werden später synchronisiert',
+    local: '📱 Nur auf diesem Gerät'
+  };
+  let acct;
+  if (u) {
+    acct = `<div class="acct">${u.photo ? `<img src="${esc(u.photo)}" alt="" referrerpolicy="no-referrer">` : ''}
+        <div><b>${esc(u.name || 'Google-Konto')}</b><div class="muted small">${esc(u.email)}</div></div></div>
+      <p class="small muted">${SYNC[st] || ''}</p>
+      <button class="btn" data-action="sign-out">Abmelden</button>`;
+  } else if (!Auth.configured()) {
+    acct = `<p>📱 <b>Lokaler Modus</b> – deine Daten liegen nur auf diesem Gerät.</p>
+      <p class="small muted" style="margin:0">Für Sync zwischen Geräten muss Firebase eingerichtet werden (siehe README).</p>`;
+  } else {
+    acct = `<p>📱 <b>Lokaler Modus</b> – deine Daten liegen nur auf diesem Gerät. Mit Google anmelden, um sie zwischen Geräten zu synchronisieren.</p>
+      <button class="btn primary" data-action="sign-in" ${Auth.status() === 'ready' ? '' : 'disabled'}>Mit Google anmelden</button>`;
+  }
+  const dis = Data.discarded();
+  const theme = Store.settings().theme;
+  view.innerHTML = `
+    <section class="panel"><h2>Konto</h2>${acct}</section>
+    <section class="panel">
+      <button class="panel-toggle ${App.discardedOpen ? 'open' : ''}" data-action="toggle-discarded" aria-expanded="${App.discardedOpen}">
+        🗑️ Verworfen (${dis.length})<span class="chev" aria-hidden="true">›</span></button>
+      ${App.discardedOpen ? `<div style="margin-top:8px">${dis.length ? dis.map(it => `<div class="row">
+          <div class="row-main"><div class="row-title">${esc(it.title)}</div>
+            <div class="card-meta">${chipHTML(Data.origin(it))}<span>verworfen am ${fmtTs(it.statusChangedAt)}</span></div></div>
+          <button class="btn small" data-action="restore" data-id="${it.id}">Wiederherstellen</button>
+          <button class="btn small danger" data-action="purge" data-id="${it.id}">Endgültig löschen</button>
+        </div>`).join('') : '<p class="muted small" style="margin:6px 0 0">Nichts verworfen.</p>'}</div>` : ''}
+    </section>
+    <section class="panel"><h2>Backup</h2>
+      <p class="small muted">Sichert alle Ordner, Ideen, Notizen und Logbücher als JSON-Datei.</p>
+      <div class="btn-row">
+        <button class="btn" data-action="export">⬇️ Exportieren</button>
+        <button class="btn" data-action="import">⬆️ Importieren</button>
+      </div>
+      <input type="file" id="import-file" accept="application/json,.json" hidden>
+    </section>
+    <section class="panel"><h2>Darstellung</h2>
+      <div class="seg" role="radiogroup" aria-label="Darstellung">
+        ${[['light', 'Hell'], ['dark', 'Dunkel'], ['auto', 'Automatisch']].map(([k, l]) =>
+          `<button class="${theme === k ? 'on' : ''}" data-action="theme" data-theme="${k}" role="radio" aria-checked="${theme === k}">${l}</button>`).join('')}
+      </div>
+    </section>
+    <p class="muted small" style="text-align:center">Lifeio ${APP_VERSION}</p>`;
+}
+
+/* ==========================================================================
+   8. Sheets: Schnell erfassen, Logbuch, Ordner
+   ========================================================================== */
+function openCapture() {
+  const onStart = App.tab === 'start';
+  const pre = App.tab === 'ordner' && !App.query && App.openFolder && App.openFolder !== LEARNED && Data.folder(App.openFolder)
+    ? App.openFolder : UNSORTED;
+  const opts = [FIXED[UNSORTED], ...Data.folders()]
+    .map(f => `<option value="${f.id}" ${f.id === pre ? 'selected' : ''}>${esc(folderLabel(f))}</option>`).join('');
+  openSheet({
+    title: 'Was willst du lernen?',
+    body: `<input class="input big-input" id="cap-title" placeholder="z. B. Gitarre spielen" maxlength="120" enterkeyhint="done" autocomplete="off">
+      <label class="field"><span>Ordner</span><select class="input" id="cap-folder">${opts}</select></label>
+      <label class="switch-row"><span>Gleich aktiv starten</span>
+        <input type="checkbox" id="cap-active" ${onStart ? 'checked' : ''}><span class="switch"></span></label>
+      <div class="sheet-actions"><span class="grow"></span>
+        <button class="btn" data-k="cancel">Abbrechen</button>
+        <button class="btn primary" data-k="save">Speichern</button></div>`,
+    onMount(sheet, close) {
+      const title = $('#cap-title', sheet);
+      title.focus();
+      const save = () => {
+        const t = title.value.trim();
+        if (!t) { title.focus(); return; }
+        const folderId = $('#cap-folder', sheet).value;
+        const active = $('#cap-active', sheet).checked;
+        Act.create({ title: t, folderId, active });
+        close();
+        const f = Data.folder(folderId);
+        if (active) toast(`🔥 „${t}“ ist jetzt auf Start`);
+        else {
+          toast(`💡 Idee gespeichert in ${folderLabel(f)}`);
+          if (App.tab === 'ordner' && !App.query) App.openFolder = folderId;
+        }
+        scheduleRender();
+      };
+      title.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); save(); } });
+      $('[data-k=save]', sheet).addEventListener('click', save);
+      $('[data-k=cancel]', sheet).addEventListener('click', close);
+    }
+  });
+}
+
+function openLogSheet(itemId, logId) {
+  const it = Store.raw('items', itemId);
+  if (!it) return;
+  const entry = logId ? (it.log || []).find(e => e.id === logId) : null;
+  openSheet({
+    title: entry ? 'Eintrag bearbeiten' : 'Neuer Logbuch-Eintrag',
+    body: `<label class="field"><span>Datum</span><input type="date" class="input" id="log-date" value="${esc(entry ? entry.date : todayISO())}"></label>
+      <label class="field"><span>Was hast du gemacht?</span><textarea class="input" id="log-text" rows="4" placeholder="z. B. Akkorde C, G, Am geübt">${esc(entry ? entry.text : '')}</textarea></label>
+      <div class="sheet-actions">
+        ${entry ? '<button class="btn danger" data-k="del">Löschen</button>' : ''}<span class="grow"></span>
+        <button class="btn" data-k="cancel">Abbrechen</button>
+        <button class="btn primary" data-k="save">Speichern</button></div>`,
+    onMount(sheet, close) {
+      const text = $('#log-text', sheet);
+      if (!entry) text.focus();
+      const save = () => {
+        const t = text.value.trim();
+        if (!t) { text.focus(); toast('Bitte etwas eintragen', 'warn'); return; }
+        const d = $('#log-date', sheet).value;
+        Act.saveLog(itemId, {
+          id: entry ? entry.id : rid('l_'),
+          date: isISO(d) ? d : todayISO(),
+          text: t,
+          createdAt: entry ? entry.createdAt : Date.now()
+        });
+        close();
+      };
+      text.addEventListener('keydown', e => { if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); save(); } });
+      $('[data-k=save]', sheet).addEventListener('click', save);
+      $('[data-k=cancel]', sheet).addEventListener('click', close);
+      if (entry) $('[data-k=del]', sheet).addEventListener('click', () => { close(); Act.deleteLog(itemId, entry.id); });
+    }
+  });
+}
+
+function openFolderSheet(folder) {
+  const used = new Set(Store.all('folders').map(f => f.color));
+  let color = folder ? folder.color : ((COLORS.find(([k]) => !used.has(k) && k !== 'grau') || COLORS[0])[0]);
+  openSheet({
+    title: folder ? 'Ordner bearbeiten' : 'Neuer Ordner',
+    body: `<label class="field"><span>Name</span><input class="input" id="fo-name" maxlength="40" value="${esc(folder ? folder.name : '')}" placeholder="z. B. Musik" autocomplete="off" enterkeyhint="done"></label>
+      <div class="field"><span>Farbe</span><div class="swatches">${COLORS.map(([k, hex]) =>
+        `<button type="button" class="swatch ${k === color ? 'on' : ''}" data-color="${k}" style="--c:${hex}" aria-label="${k}"></button>`).join('')}</div></div>
+      <label class="field"><span>Emoji (optional)</span><input class="input" id="fo-emoji" value="${esc(folder ? folder.emoji : '')}" placeholder="z. B. 🎵" autocomplete="off"></label>
+      <div class="emoji-row">${EMOJIS.map(e => `<button type="button" data-emoji="${e}">${e}</button>`).join('')}</div>
+      <div class="sheet-actions"><span class="grow"></span>
+        <button class="btn" data-k="cancel">Abbrechen</button>
+        <button class="btn primary" data-k="save">${folder ? 'Speichern' : 'Anlegen'}</button></div>`,
+    onMount(sheet, close) {
+      const name = $('#fo-name', sheet);
+      const emoji = $('#fo-emoji', sheet);
+      if (!folder) name.focus();
+      sheet.addEventListener('click', e => {
+        const sw = e.target.closest('[data-color]');
+        if (sw) {
+          color = sw.dataset.color;
+          $$('.swatch', sheet).forEach(b => b.classList.toggle('on', b === sw));
+        }
+        const em = e.target.closest('[data-emoji]');
+        if (em) emoji.value = emoji.value === em.dataset.emoji ? '' : em.dataset.emoji;
+      });
+      const save = () => {
+        const n = name.value.trim();
+        if (!n) { name.focus(); toast('Bitte einen Namen eingeben', 'warn'); return; }
+        const doc = { name: n, emoji: firstGrapheme(emoji.value), color };
+        if (folder) Store.put('folders', folder.id, doc);
+        else {
+          App.openFolder = Act.createFolder(doc);
+          App.query = '';
+        }
+        close();
+        scheduleRender();
+      };
+      name.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); save(); } });
+      $('[data-k=save]', sheet).addEventListener('click', save);
+      $('[data-k=cancel]', sheet).addEventListener('click', close);
+    }
+  });
+}
+
+/* ==========================================================================
+   9. Backup
+   ========================================================================== */
+function exportBackup() {
+  const payload = {
+    app: 'lifeio', version: 1, exportedAt: new Date().toISOString(),
+    folders: Store.all('folders'), items: Store.all('items'), settings: Store.settings()
+  };
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `lifeio-backup-${todayISO()}.json`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+  toast('Backup exportiert');
+}
+
+async function importBackup(file) {
+  let o;
+  try { o = JSON.parse(await file.text()); }
+  catch (e) { toast('Die Datei ist kein gültiges JSON', 'error'); return; }
+  if (!o || o.app !== 'lifeio' || !Array.isArray(o.folders) || !Array.isArray(o.items)) {
+    toast('Das ist kein Lifeio-Backup', 'error');
+    return;
+  }
+  const folders = o.folders.filter(f => f && typeof f.id === 'string' && f.id && !FIXED[f.id] && typeof f.name === 'string')
+    .map(f => ({ ...f, color: COLOR[f.color] ? f.color : 'grau', emoji: typeof f.emoji === 'string' ? f.emoji : '' }));
+  const items = o.items.filter(i => i && typeof i.id === 'string' && i.id && typeof i.title === 'string')
+    .map(i => ({
+      ...i,
+      status: STATUSES.includes(i.status) ? i.status : 'idea',
+      notes: typeof i.notes === 'string' ? i.notes : '',
+      log: Array.isArray(i.log) ? i.log.filter(e => e && typeof e.text === 'string' && isISO(e.date)) : []
+    }));
+  const when = o.exportedAt ? ` vom ${fmtTs(Date.parse(o.exportedAt))}` : '';
+  const ok = await confirmDialog({
+    title: 'Backup importieren?',
+    text: `Backup${when} mit ${items.length} ${items.length === 1 ? 'Eintrag' : 'Einträgen'} und ${folders.length} ${folders.length === 1 ? 'Ordner' : 'Ordnern'}. Alle aktuellen Daten werden ersetzt.`,
+    okLabel: 'Importieren', danger: true
+  });
+  if (!ok) return;
+  const keepF = new Set(folders.map(f => f.id));
+  const keepI = new Set(items.map(i => i.id));
+  const ops = [
+    ...Store.all('folders').filter(f => !keepF.has(f.id)).map(f => ({ type: 'del', coll: 'folders', id: f.id })),
+    ...Store.all('items').filter(i => !keepI.has(i.id)).map(i => ({ type: 'del', coll: 'items', id: i.id })),
+    ...folders.map(f => ({ type: 'put', coll: 'folders', id: f.id, doc: f, replace: true })),
+    ...items.map(i => ({ type: 'put', coll: 'items', id: i.id, doc: i, replace: true }))
+  ];
+  App.openItem = null;
+  App.openFolder = null;
+  await Store.batch(ops);
+  if (o.settings && ['auto', 'light', 'dark'].includes(o.settings.theme)) Store.saveSettings({ theme: o.settings.theme });
+  toast('Backup importiert');
+}
+
+/* ==========================================================================
+   10. Darstellung (Hell / Dunkel / Automatisch)
+   ========================================================================== */
+const darkMQ = window.matchMedia('(prefers-color-scheme: dark)');
+function applyTheme() {
+  const t = Store.settings().theme;
+  const root = document.documentElement;
+  if (t === 'light' || t === 'dark') root.dataset.theme = t; else delete root.dataset.theme;
+  try { localStorage.setItem(LS.theme, t); } catch (e) {}
+  const dark = t === 'dark' || (t !== 'light' && darkMQ.matches);
+  $('meta[name=theme-color]').setAttribute('content', dark ? '#111114' : '#f5f5f7');
+}
+darkMQ.addEventListener && darkMQ.addEventListener('change', applyTheme);
+
+/* ==========================================================================
+   11. Ereignisse
+   ========================================================================== */
+const Actions = {
+  tab(el) {
+    const t = el.dataset.tab;
+    if (t === App.tab) { window.scrollTo({ top: 0, behavior: 'smooth' }); return; }
+    App.tab = t;
+    App.editingNotes = null;
+    render();
+  },
+  'goto-ordner'() { App.tab = 'ordner'; render(); },
+  capture() { openCapture(); },
+  'toggle-card'(el) {
+    const id = el.dataset.id;
+    App.openItem = App.openItem === id ? null : id;
+    App.editingNotes = null;
+    render();
+    if (App.openItem) {
+      const card = $(`.card[data-id="${id}"]`);
+      if (card) card.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    }
+  },
+  activate: el => Act.activate(el.dataset.id),
+  pause: el => Act.pause(el.dataset.id),
+  resume: el => Act.resume(el.dataset.id),
+  learned: el => Act.learned(el.dataset.id),
+  relearn: el => Act.relearn(el.dataset.id),
+  'to-idea': el => Act.toIdea(el.dataset.id),
+  restore: el => Act.restore(el.dataset.id),
+  purge: el => Act.purge(el.dataset.id),
+  async 'card-more'(el) {
+    const k = await actionSheet('', [{ key: 'discard', label: '🗑️ Verwerfen', danger: true }]);
+    if (k === 'discard') Act.discard(el.dataset.id);
+  },
+  'edit-notes'(el) {
+    const it = Store.raw('items', el.dataset.id);
+    if (!it) return;
+    App.editingNotes = it.id;
+    el.outerHTML = notesEditHTML(it);
+    const ta = $(`textarea.notes-edit[data-id="${it.id}"]`);
+    autosize(ta);
+    ta.focus();
+    ta.setSelectionRange(ta.value.length, ta.value.length);
+  },
+  'add-log': el => openLogSheet(el.dataset.id),
+  'edit-log': el => openLogSheet(el.dataset.id, el.dataset.log),
+  'toggle-paused'() { App.pausedOpen = !App.pausedOpen; render(); },
+  'toggle-discarded'() { App.discardedOpen = !App.discardedOpen; render(); },
+  'toggle-folder'(el) {
+    const id = el.dataset.id;
+    App.openFolder = App.openFolder === id ? null : id;
+    // Klassen direkt umschalten (nicht neu zeichnen) → Ordner gleiten auf/zu, die dahinter rutschen nach
+    $$('#cabinet .folder').forEach(s => {
+      const on = s.dataset.folder === App.openFolder;
+      s.classList.toggle('open', on);
+      $('.folder-tab-btn', s).setAttribute('aria-expanded', on);
+    });
+    if (App.openFolder) {
+      setTimeout(() => {
+        const s = $(`#cabinet .folder[data-folder="${App.openFolder}"]`);
+        if (!s) return;
+        const top = s.getBoundingClientRect().top;
+        if (top < 120 || top > window.innerHeight * .55) s.scrollIntoView({ block: 'start', behavior: 'smooth' });
+      }, 400);
+    }
+  },
+  async 'folder-menu'(el) {
+    const id = el.dataset.id;
+    const list = Data.folders();
+    const i = list.findIndex(f => f.id === id);
+    const f = list[i];
+    if (!f) return;
+    const k = await actionSheet(folderLabel(f), [
+      { key: 'edit', label: '✏️ Bearbeiten' },
+      { key: 'up', label: '⬆️ Nach oben', disabled: i === 0 },
+      { key: 'down', label: '⬇️ Nach unten', disabled: i === list.length - 1 },
+      { key: 'delete', label: '🗑️ Ordner löschen', danger: true }
+    ]);
+    if (k === 'edit') openFolderSheet(f);
+    else if (k === 'up') Act.moveFolder(id, -1);
+    else if (k === 'down') Act.moveFolder(id, 1);
+    else if (k === 'delete') Act.deleteFolder(id);
+  },
+  'new-folder'() { openFolderSheet(null); },
+  'clear-search'() {
+    App.query = '';
+    const s = $('#search');
+    if (s) s.value = '';
+    renderCabinet();
+  },
+  'sign-in'() { Auth.signIn(); },
+  'sign-out'() { Auth.signOut(); },
+  export() { exportBackup(); },
+  import() { const f = $('#import-file'); if (f) f.click(); },
+  theme(el) { Store.saveSettings({ theme: el.dataset.theme }); applyTheme(); }
+};
+
+document.addEventListener('click', e => {
+  const el = e.target.closest('[data-action]');
+  if (!el || !$('#app').contains(el)) return;
+  if (e.target.closest('.handle') || e.target.closest('a')) return;
+  const fn = Actions[el.dataset.action];
+  if (fn) fn(el, e);
+});
+document.addEventListener('keydown', e => {
+  const t = e.target;
+  if (t.matches && t.matches('.card-head') && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); Actions['toggle-card'](t); }
+  if (t.matches && t.matches('.f-title') && e.key === 'Enter') { e.preventDefault(); t.blur(); }
+});
+document.addEventListener('input', e => {
+  const t = e.target;
+  if (t.id === 'search') { App.query = t.value; renderCabinet(); }
+  else if (t.matches('textarea.notes-edit')) { autosize(t); NotesSaver.schedule(t.dataset.id, t.value); }
+});
+document.addEventListener('change', e => {
+  const t = e.target;
+  if (t.matches('.f-title')) {
+    const it = Store.raw('items', t.dataset.id);
+    if (!it) return;
+    const v = t.value.trim();
+    if (!v) { t.value = it.title; return; }
+    if (v !== it.title) {
+      Act.setTitle(it.id, v);
+      const head = t.closest('.card') && $('.card-title', t.closest('.card'));
+      if (head) head.textContent = v;
+    }
+  } else if (t.matches('.f-folder')) {
+    const it = Store.raw('items', t.dataset.id);
+    if (!it) return;
+    const fid = t.value;
+    // Eine Idee „wandert“ mit – der Zielordner geht auf, damit die Karte sichtbar bleibt
+    if (it.status === 'idea' && App.tab === 'ordner' && !App.query && App.openFolder === Data.originId(it)) App.openFolder = fid;
+    Act.setFolder(it.id, fid);
+    if (it.status === 'idea') toast(`Verschoben nach ${folderLabel(Data.folder(fid))}`);
+  } else if (t.id === 'import-file') {
+    const f = t.files && t.files[0];
+    t.value = '';
+    if (f) importBackup(f);
+  }
+});
+document.addEventListener('focusout', e => {
+  const t = e.target;
+  if (!t.matches || !t.matches('textarea.notes-edit')) return;
+  const id = t.dataset.id;
+  NotesSaver.flush(id);
+  if (App.editingNotes === id) App.editingNotes = null;
+  const it = Store.raw('items', id);
+  if (!it || !t.isConnected) return;
+  // Höhe kurz halten, damit nichts verrutscht, während ein Knopf darunter angetippt wird
+  const h = t.offsetHeight;
+  t.outerHTML = notesViewHTML(it);
+  const v = $(`.notes-view[data-id="${id}"]`);
+  if (v) { v.style.minHeight = h + 'px'; setTimeout(() => { v.style.minHeight = ''; }, 450); }
+});
+
+/* Umsortieren der aktiven Skills per Ziehgriff */
+document.addEventListener('pointerdown', e => {
+  const handle = e.target.closest && e.target.closest('.handle');
+  if (!handle || (e.pointerType === 'mouse' && e.button !== 0)) return;
+  const card = handle.closest('.card');
+  const list = card && card.parentElement;
+  if (!list || !list.dataset.list) return;
+  const cards = $$(':scope > .card', list);
+  if (cards.length < 2) return;
+  e.preventDefault();
+  const idx = cards.indexOf(card);
+  const rects = cards.map(c => c.getBoundingClientRect());
+  const centers = rects.map(r => r.top + r.height / 2);
+  const gap = parseFloat(getComputedStyle(list).rowGap) || 10;
+  const shift = rects[idx].height + gap;
+  const startY = e.clientY;
+  let target = idx;
+  card.classList.add('dragging');
+  list.classList.add('drag-active');
+  try { handle.setPointerCapture(e.pointerId); } catch (err) {}
+  const onMove = ev => {
+    const dy = ev.clientY - startY;
+    card.style.transform = `translateY(${dy}px)`;
+    // Maßgeblich ist die Fingerposition am Griff (auch bei hohen, aufgeklappten Karten)
+    const c = ev.clientY;
+    target = idx;
+    for (let i = 0; i < idx; i++) if (c < centers[i]) { target = i; break; }
+    if (target === idx) for (let i = cards.length - 1; i > idx; i--) if (c > centers[i]) { target = i; break; }
+    cards.forEach((el, i) => {
+      if (i === idx) return;
+      let s = 0;
+      if (idx < target && i > idx && i <= target) s = -shift;
+      if (idx > target && i < idx && i >= target) s = shift;
+      el.style.transform = s ? `translateY(${s}px)` : '';
+    });
+  };
+  const onUp = () => {
+    handle.removeEventListener('pointermove', onMove);
+    handle.removeEventListener('pointerup', onUp);
+    handle.removeEventListener('pointercancel', onUp);
+    cards.forEach(el => { el.style.transform = ''; });
+    card.classList.remove('dragging');
+    list.classList.remove('drag-active');
+    if (target !== idx) {
+      const ids = cards.map(c => c.dataset.id);
+      const [m] = ids.splice(idx, 1);
+      ids.splice(target, 0, m);
+      Act.reorderActive(ids);
+    }
+  };
+  handle.addEventListener('pointermove', onMove);
+  handle.addEventListener('pointerup', onUp);
+  handle.addEventListener('pointercancel', onUp);
+});
+
+/* Beim Verlassen nichts verlieren */
+function saveAll() { NotesSaver.flushAll(); Store.saveNow(); }
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') saveAll(); });
+window.addEventListener('pagehide', saveAll);
+
+/* ==========================================================================
+   12. Service Worker & Start
+   ========================================================================== */
+function registerSW() {
+  if (!('serviceWorker' in navigator) || location.protocol === 'file:') return;
+  const hadController = !!navigator.serviceWorker.controller;
+  let reloading = false;
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if (!hadController || reloading) return;
+    reloading = true;
+    location.reload();
+  });
+  navigator.serviceWorker.register('sw.js').then(reg => {
+    const offer = sw => toast('Neue Version verfügbar', 'info', { duration: 20000, action: { label: 'Neu laden', fn: () => sw.postMessage({ type: 'SKIP_WAITING' }) } });
+    if (reg.waiting && navigator.serviceWorker.controller) offer(reg.waiting);
+    reg.addEventListener('updatefound', () => {
+      const sw = reg.installing;
+      if (!sw) return;
+      sw.addEventListener('statechange', () => { if (sw.state === 'installed' && navigator.serviceWorker.controller) offer(sw); });
+    });
+    document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') reg.update().catch(() => {}); });
+  }).catch(e => console.warn('Service Worker:', e));
+}
+
+function boot() {
+  Store.boot();
+  applyTheme();
+  Store.subscribe(() => { applyTheme(); scheduleRender(); });
+  Store.onSync(() => { if (App.tab === 'mehr') scheduleRender(); });
+  render();
+  Auth.init();
+  registerSW();
+}
+boot();
+})();
+</script>
+</body>
+</html>
