@@ -3,7 +3,7 @@
    WICHTIG: CACHE bei JEDEM Deploy hochzählen (lifeio-v2, lifeio-v3, …),
    sonst zeigt das iPhone ggf. noch alte Assets.
    ========================================================================== */
-const CACHE = 'lifeio-v1';
+const CACHE = 'lifeio-v2';
 
 const APP_SHELL = ['./', './index.html', './manifest.json', './icon-192.png', './icon-512.png'];
 const CDN_ASSETS = [
