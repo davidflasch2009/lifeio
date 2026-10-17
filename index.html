@@ -137,7 +137,10 @@ svg { display: block; }
   z-index: -1;
   overflow: hidden;
   pointer-events: none;
-  /* Start: links Marine, Mitte Aurora, unten grün */
+  background: #021f3f;
+}
+/* Start: links Marine, Mitte Aurora, unten grün */
+.bgl-start {
   background:
     radial-gradient(75% 26% at 42% 86%, rgba(10, 128, 96, .95), transparent 75%),
     radial-gradient(40% 26% at 0% 86%, rgba(13, 66, 62, .95), transparent 75%),
@@ -146,14 +149,14 @@ svg { display: block; }
     radial-gradient(50% 30% at 0% 12%, rgba(12, 70, 100, .6), transparent 75%),
     linear-gradient(180deg, #03305a 0%, #01264a 38%, #04203f 55%, #0a1f38 66%, #0b2c3a 80%, #0c3d3e 100%);
 }
-body[data-tab="mehr"] .bg {
+.bgl-mehr {
   background:
     radial-gradient(42% 22% at 0% 90%, rgba(14, 72, 58, .95), transparent 75%),
     linear-gradient(162deg, transparent 38%, rgba(120, 205, 225, .13) 48%, transparent 58%),
     linear-gradient(180deg, transparent 55%, rgba(1, 18, 38, .35) 100%),
     linear-gradient(90deg, #00142c 0%, #001a36 20%, #012244 33%, #043a68 52%, #065483 68%, #08668a 84%, #0a6a87 100%);
 }
-body[data-tab="ordner"] .bg {
+.bgl-ordner {
   background:
     radial-gradient(55% 26% at 2% 84%, rgba(88, 165, 92, .95), transparent 75%),
     radial-gradient(36% 18% at 34% 90%, rgba(30, 140, 108, .8), transparent 75%),
@@ -162,6 +165,7 @@ body[data-tab="ordner"] .bg {
     radial-gradient(55% 30% at 100% 88%, rgba(3, 60, 93, .9), transparent 75%),
     linear-gradient(180deg, #00142f 0%, #021a3c 30%, #071b3a 55%, #0b1c34 70%, #0c2a36 100%);
 }
+html[data-theme="light"] .bgl { display: none; }
 html[data-theme="light"] .bg,
 html[data-theme="light"] body[data-tab] .bg {
   background:
@@ -170,6 +174,7 @@ html[data-theme="light"] body[data-tab] .bg {
     linear-gradient(165deg, #2aa7ee 0%, #79d1f7 38%, #c6f1fb 68%, #bff0b4 100%);
 }
 @media (prefers-color-scheme: light) {
+  html:not([data-theme="dark"]) .bgl { display: none; }
   html:not([data-theme="dark"]) .bg,
   html:not([data-theme="dark"]) body[data-tab] .bg {
     background:
@@ -1007,8 +1012,255 @@ textarea.notes-edit { min-height: 92px; display: block; }
 .toast button { border: 0; background: none; color: #9ff0ff; font-weight: 750; padding: 4px 8px; white-space: nowrap; }
 @keyframes toastIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
 
+
+/* ==========================================================================
+   8. Animationen – alles soll leben
+   ========================================================================== */
+#fx { position: fixed; inset: 0; z-index: 45; pointer-events: none; overflow: hidden; }
+.ghost { position: fixed; z-index: 45; pointer-events: none; will-change: transform, opacity; }
+.ghost.folder-inner { padding: 0; display: block; }
+.ghost > .card { margin: 0; height: 100%; }
+
+/* Partikel (Konfetti, Sterne, Blasen) */
+.pt { position: fixed; pointer-events: none; will-change: transform, opacity; }
+.pt.dot { border-radius: 50%; background: var(--c); box-shadow: 0 0 8px var(--c); }
+.pt.bub {
+  border-radius: 50%;
+  background: radial-gradient(circle at 32% 28%, #fff 0 18%, rgba(255, 255, 255, .15) 40%, rgba(255, 255, 255, .05) 60%, var(--c) 100%);
+  box-shadow: 0 0 6px var(--c);
+}
+.pt.star {
+  background:
+    radial-gradient(circle, #fff 0 14%, transparent 15%),
+    linear-gradient(90deg, transparent 42%, var(--c) 50%, transparent 58%),
+    linear-gradient(0deg, transparent 42%, var(--c) 50%, transparent 58%);
+  -webkit-mask: radial-gradient(circle, #000 20%, transparent 70%);
+  mask: radial-gradient(circle, #000 20%, transparent 70%);
+  filter: drop-shadow(0 0 4px var(--c));
+}
+.pt-ring {
+  position: fixed;
+  width: 70px; height: 70px;
+  border-radius: 50%;
+  border: 3px solid rgba(190, 255, 220, .85);
+  box-shadow: 0 0 22px rgba(150, 255, 200, .7), inset 0 0 14px rgba(150, 255, 200, .5);
+  pointer-events: none;
+}
+.orb {
+  position: fixed;
+  width: 34px; height: 34px;
+  border-radius: 50%;
+  pointer-events: none;
+  background: radial-gradient(circle at 32% 28%, #fff 0 16%, rgba(190, 240, 255, .55) 38%, rgba(110, 170, 255, .45) 70%, rgba(170, 130, 255, .7) 100%);
+  box-shadow: 0 0 18px rgba(140, 200, 255, .9), 0 0 40px rgba(160, 120, 255, .5);
+}
+
+/* Lichtwelle beim Antippen */
+.btn, .tab-btn, .folder-tab-btn, .panel-toggle, .seg button, .folder-new { position: relative; overflow: hidden; }
+.tab-btn { border-radius: 28px; }
+.ripple {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+  background: radial-gradient(circle, rgba(255, 255, 255, .6), rgba(255, 255, 255, .15) 45%, rgba(255, 255, 255, 0) 70%);
+  transform: scale(0);
+}
+
+/* Glanz-Schimmer über die lila Knöpfe */
+.btn.primary::after {
+  content: '';
+  position: absolute;
+  top: -30%; bottom: -30%;
+  left: 0;
+  width: 38%;
+  background: linear-gradient(100deg, transparent, rgba(255, 255, 255, .6), transparent);
+  transform: translateX(-160%) skewX(-22deg);
+  animation: shine 5s ease-in-out infinite;
+  pointer-events: none;
+}
+.empty-state .btn.primary::after { animation-delay: 1.6s; }
+@keyframes shine { 0%, 62% { transform: translateX(-160%) skewX(-22deg); } 100% { transform: translateX(360%) skewX(-22deg); } }
+
+/* Panels: Lichtstreif beim Erscheinen */
+.panel { overflow: hidden; }
+.panel::after {
+  content: '';
+  position: absolute;
+  top: 0; bottom: 0;
+  left: 0;
+  width: 45%;
+  background: linear-gradient(100deg, transparent, rgba(255, 255, 255, .16), transparent);
+  transform: translateX(-130%) skewX(-18deg);
+  animation: panelSweep 1.4s .35s cubic-bezier(.4, 0, .2, 1) both;
+  pointer-events: none;
+}
+@keyframes panelSweep { to { transform: translateX(330%) skewX(-18deg); } }
+
+/* „+“-Kugel: schwebt, pulsiert, dreht beim Antippen */
+.fab { animation: fabFloat 4.2s ease-in-out infinite; }
+.fab::after {
+  content: '';
+  position: absolute;
+  inset: -7px;
+  border-radius: 50%;
+  border: 2px solid rgba(150, 175, 255, .55);
+  animation: ringPulse 2.8s ease-out infinite;
+  pointer-events: none;
+}
+.fab.spin svg { animation: fabSpin .55s cubic-bezier(.34, 1.56, .64, 1); }
+@keyframes fabFloat { 0%, 100% { translate: 0 0; } 50% { translate: 0 -4px; } }
+@keyframes ringPulse { 0% { transform: scale(.92); opacity: .8; } 100% { transform: scale(1.45); opacity: 0; } }
+@keyframes fabSpin { from { transform: rotate(0) scale(.7); } to { transform: rotate(180deg) scale(1); } }
+
+/* Tab-Leiste: gleitendes Glas-Leuchten unter dem aktiven Tab */
+.tab-glow {
+  position: absolute;
+  top: 6px; bottom: 6px;
+  left: 6px;
+  width: calc((100% - 12px) / 3);
+  border-radius: 28px;
+  background:
+    radial-gradient(70% 55% at 50% 38%, rgba(255, 255, 255, .38), rgba(255, 255, 255, .06) 70%, transparent),
+    linear-gradient(180deg, rgba(255, 255, 255, .16), rgba(255, 255, 255, .02));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .55), inset 0 0 0 1px rgba(255, 255, 255, .18), 0 0 18px rgba(170, 240, 255, .25);
+  transform: translateX(calc(var(--tab-i, 0) * 100%));
+  transition: transform .55s cubic-bezier(.34, 1.45, .64, 1);
+  pointer-events: none;
+}
+
+/* Spross: wächst und wiegt sich */
+.empty-state .sprout { transform-origin: 52% 94%; animation: sway 5.5s ease-in-out infinite; }
+.sprout .sp-leafL { transform-box: fill-box; transform-origin: 96% 72%; animation: flutterL 4.6s ease-in-out infinite; }
+.sprout .sp-leafR { transform-box: fill-box; transform-origin: 3% 97%; animation: flutterR 5.2s ease-in-out infinite; }
+.sprout .sp-star { transform-box: fill-box; transform-origin: 50% 50%; animation: starTwinkle 2.6s ease-in-out infinite; }
+.grow .sprout .sp-stem { stroke-dasharray: 90; stroke-dashoffset: 90; animation: drawStem .7s .1s cubic-bezier(.3, .7, .3, 1) forwards; }
+.grow .sprout .sp-leafL { animation: leafPop .8s .55s cubic-bezier(.34, 1.56, .64, 1) both, flutterL 4.6s 1.4s ease-in-out infinite; }
+.grow .sprout .sp-leafR { animation: leafPop .8s .72s cubic-bezier(.34, 1.56, .64, 1) both, flutterR 5.2s 1.6s ease-in-out infinite; }
+.grow .sprout .sp-shadow { transform-box: fill-box; transform-origin: 50% 50%; animation: shadowIn .7s .1s ease-out both; }
+.grow .sprout .sp-star { animation: starPop .7s 1.35s cubic-bezier(.34, 1.56, .64, 1) both, starTwinkle 2.6s 2.1s ease-in-out infinite; }
+.grow p { animation: riseIn .6s 1s cubic-bezier(.2, .9, .25, 1.1) both; }
+.grow .btn { animation: riseIn .6s 1.15s cubic-bezier(.2, .9, .25, 1.1) both; }
+.grow .specks { animation: fadeIn 1s .9s ease-out both; }
+@keyframes sway { 0%, 100% { transform: rotate(-2.2deg); } 50% { transform: rotate(2.2deg); } }
+@keyframes flutterL { 0%, 100% { transform: rotate(0); } 50% { transform: rotate(-4deg); } }
+@keyframes flutterR { 0%, 100% { transform: rotate(0); } 50% { transform: rotate(5deg); } }
+@keyframes drawStem { to { stroke-dashoffset: 0; } }
+@keyframes leafPop { from { transform: scale(0) rotate(-30deg); opacity: 0; } to { transform: none; opacity: 1; } }
+@keyframes shadowIn { from { transform: scale(.2); opacity: 0; } to { transform: none; opacity: 1; } }
+@keyframes starPop { from { transform: scale(0) rotate(-90deg); opacity: 0; } to { transform: none; opacity: 1; } }
+@keyframes starTwinkle { 0%, 100% { transform: scale(.75) rotate(0); opacity: .75; } 50% { transform: scale(1.2) rotate(45deg); opacity: 1; } }
+@keyframes riseIn { from { opacity: 0; transform: translateY(16px) scale(.96); } to { opacity: 1; transform: none; } }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+.speck { animation: drift 7s ease-in-out infinite alternate, speckTwinkle 3.4s ease-in-out infinite; }
+@keyframes speckTwinkle { 0%, 100% { filter: brightness(1); } 50% { filter: brightness(1.8); } }
+
+/* Hintergrund: weicher Wechsel zwischen den Tabs, atmende Aurora, aufsteigende Blasen */
+.bgl { position: absolute; inset: 0; opacity: 0; transition: opacity .8s ease; }
+body[data-tab="start"] .bgl-start, body[data-tab="mehr"] .bgl-mehr, body[data-tab="ordner"] .bgl-ordner { opacity: 1; }
+.halo { animation: haloBreath 13s ease-in-out infinite alternate; }
+.flare { animation: flarePulse 6s ease-in-out infinite; }
+.arc.a1 { animation: arcTurn 30s ease-in-out infinite alternate; }
+.arc.a2 { animation: arcTurn 38s ease-in-out infinite alternate-reverse; }
+@keyframes haloBreath { from { transform: rotate(-3deg) scale(.99); } to { transform: rotate(4deg) scale(1.05); } }
+@keyframes flarePulse { 0%, 100% { scale: 1; } 50% { scale: 1.18; } }
+@keyframes arcTurn { from { transform: rotate(-4deg); } to { transform: rotate(5deg); } }
+.rise {
+  position: absolute;
+  left: var(--x);
+  bottom: -40px;
+  width: var(--s); height: var(--s);
+  border-radius: 50%;
+  background: radial-gradient(circle at 32% 28%, rgba(255, 255, 255, .9) 0 10%, rgba(255, 255, 255, .25) 18%, rgba(255, 255, 255, .04) 48%, rgba(255, 255, 255, .14) 74%, rgba(255, 255, 255, .5) 100%);
+  opacity: 0;
+  animation: rise var(--d) linear infinite;
+  animation-delay: var(--delay);
+}
+@keyframes rise {
+  0% { transform: translate3d(0, 0, 0); opacity: 0; }
+  10% { opacity: .7; }
+  50% { transform: translate3d(14px, -55vh, 0); }
+  88% { opacity: .55; }
+  100% { transform: translate3d(-10px, -112vh, 0); opacity: 0; }
+}
+.drop { animation: wobble var(--w, 5s) ease-in-out infinite; }
+@keyframes wobble {
+  0%, 100% { transform: rotate(var(--r, 0deg)) scale(1, 1); }
+  35% { transform: rotate(var(--r, 0deg)) scale(1.06, .94); }
+  70% { transform: rotate(var(--r, 0deg)) scale(.96, 1.05); }
+}
+
+/* Ordner: Blätter fächern beim Öffnen nacheinander auf, Reiter heben sich */
+.folder-tab { transition: transform .35s cubic-bezier(.34, 1.56, .64, 1), filter .3s; }
+.folder.open .folder-tab { transform: translateY(-3px); filter: drop-shadow(0 -4px 10px rgba(255, 255, 255, .22)); }
+@media (hover: hover) { .folder:not(.open) .folder-tab:hover { transform: translateY(-3px); } }
+.folder.just-opened .folder-inner > .card { animation: paperIn .55s cubic-bezier(.2, .9, .3, 1.15) both; animation-delay: calc(var(--i, 0) * 65ms + 120ms); }
+@keyframes paperIn { from { opacity: 0; transform: translateY(-18px) scale(.94) rotate(-1.5deg); } to { opacity: 1; transform: none; } }
+.count.bump { animation: bump .6s cubic-bezier(.34, 1.56, .64, 1); }
+@keyframes bump { 0% { transform: scale(1); } 40% { transform: scale(1.5); background: rgba(255, 255, 255, .55); color: #0b2f45; } 100% { transform: scale(1); } }
+
+/* Karten: sanftes Anheben, aufklappen mit Schwung */
+@media (hover: hover) { .card:not(.open):not(.dragging):hover { transform: translateY(-2px); } }
+.card { transition: transform .25s ease, box-shadow .25s ease; }
+.card-head:active .card-main { transform: scale(.985); }
+.card-main { transition: transform .15s; }
+.card-body { animation: bodyIn .38s cubic-bezier(.2, .9, .25, 1.1); }
+.card-body > * { animation: riseIn .4s both; }
+.card-body > :nth-child(2) { animation-delay: .04s; }
+.card-body > :nth-child(3) { animation-delay: .08s; }
+.card-body > :nth-child(4) { animation-delay: .12s; }
+.card-body > :nth-child(5) { animation-delay: .16s; }
+
+/* Sheets federn herein, Inhalte nacheinander */
+.sheet { transition: transform .5s cubic-bezier(.32, 1.32, .55, 1); }
+.sheet-backdrop.show .sheet > * { animation: riseIn .45s both; animation-delay: calc(var(--i, 0) * 40ms + 90ms); }
+@media (min-width: 700px) { .sheet { transition: transform .45s cubic-bezier(.32, 1.4, .55, 1), opacity .25s; } }
+
+/* Hinweise: federn hoch, Rückgängig-Zeitbalken */
+.toast { position: relative; overflow: hidden; animation: toastIn .5s cubic-bezier(.34, 1.56, .64, 1); }
+@keyframes toastIn { from { opacity: 0; transform: translateY(24px) scale(.9); } to { opacity: 1; transform: none; } }
+.toast-bar { position: absolute; left: 0; bottom: 0; height: 3px; width: 100%; background: linear-gradient(90deg, #8ff2ff, #c9a0ff); transform-origin: left; animation: toastBar linear forwards; }
+@keyframes toastBar { from { transform: scaleX(1); } to { transform: scaleX(0); } }
+
+/* Darstellung: gleitende Glas-Pille */
+.seg { position: relative; }
+.seg-pill {
+  position: absolute;
+  top: 4px; bottom: 4px; left: 4px;
+  width: calc((100% - 8px) / 3);
+  border-radius: 21px;
+  border: 1px solid rgba(255, 255, 255, .7);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, .55) 0%, rgba(255, 255, 255, .2) 50%, rgba(255, 255, 255, .1) 52%, rgba(255, 255, 255, .25) 100%),
+    rgba(170, 210, 225, .35);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .85), 0 2px 8px rgba(0, 30, 60, .3);
+  transform: translateX(calc(var(--seg-i, 0) * 100%));
+  transition: transform .55s cubic-bezier(.34, 1.45, .64, 1);
+  pointer-events: none;
+}
+.seg button { z-index: 1; transition: color .3s; }
+.seg button.on { background: none; border-color: transparent; box-shadow: none; }
+
+/* Intro: Logo glänzt auf */
+#splash {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: grid;
+  place-items: center;
+  background: radial-gradient(60% 40% at 50% 45%, #0b5a78, #031d3c 70%);
+  transition: opacity .5s ease, transform .5s ease;
+}
+#splash img {
+  width: 132px; height: 132px;
+  filter: drop-shadow(0 0 30px rgba(120, 230, 255, .65)) drop-shadow(0 10px 20px rgba(0, 10, 30, .5));
+  animation: splashPop .75s cubic-bezier(.34, 1.56, .64, 1) both;
+}
+#splash.out { opacity: 0; transform: scale(1.08); pointer-events: none; }
+@keyframes splashPop { from { opacity: 0; transform: scale(.4) rotate(-12deg); } to { opacity: 1; transform: none; } }
+html[data-theme="light"] #splash { background: radial-gradient(60% 40% at 50% 45%, #c6f1fb, #2aa7ee 75%); }
+
 @media (prefers-reduced-motion: reduce) {
-  .bg *, .empty-state .sprout, .speck, .spark { animation: none !important; }
+  .bg *, .drops *, .empty-state .sprout, .sprout *, .speck, .spark, .fab, .fab::after, .btn.primary::after, .panel::after { animation: none !important; }
   *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
 }
 </style>
@@ -1016,6 +1268,7 @@ textarea.notes-edit { min-height: 92px; display: block; }
 <body>
 <div class="bg" aria-hidden="true"></div>
 <div class="drops" aria-hidden="true"></div>
+<div id="fx" aria-hidden="true"></div>
 <div class="app" id="app">
   <header class="topbar"><h1 id="title">Start</h1></header>
   <main id="view"></main>
@@ -1052,7 +1305,7 @@ const FIREBASE_CONFIG = {
 /* ==========================================================================
    1. Konstanten & Helfer
    ========================================================================== */
-const APP_VERSION = '1.2.0';
+const APP_VERSION = '1.3.0';
 const LS = { data: 'lifeio-data', theme: 'lifeio-theme' };
 const CDN = {
   fbApp: 'https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js',
@@ -1206,17 +1459,21 @@ const ICON = {
     <path d="M16 2.5v11.5M11.2 9.5 16 14.2l4.8-4.7" fill="none" stroke="#e8393a" stroke-width="3.3" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
   plus: `<svg viewBox="0 0 32 32" aria-hidden="true"><path d="M16 6.5v19M6.5 16h19" stroke="#fff" stroke-width="5" stroke-linecap="round"/></svg>`,
   sprout: `<svg class="sprout" viewBox="0 0 180 150" aria-hidden="true">
-    <ellipse cx="93" cy="141" rx="44" ry="7.5" fill="url(#i-shadow)"/>
-    <path d="M92 139C88 119 86 99 100 77" fill="none" stroke="url(#i-stem)" stroke-width="11" stroke-linecap="round"/>
+    <ellipse class="sp-shadow" cx="93" cy="141" rx="44" ry="7.5" fill="url(#i-shadow)"/>
+    <path class="sp-stem" d="M92 139C88 119 86 99 100 77" fill="none" stroke="url(#i-stem)" stroke-width="11" stroke-linecap="round"/>
+    <g class="sp-leafL">
     <path d="M92 98C78 46 20 38 0 110c40 26 82 18 92-12Z" fill="url(#i-leafL)"/><path d="M92 98C72 116 34 124 0 110c36 12 70 10 92-12Z" fill="#14520c" fill-opacity=".35"/>
     <path d="M86 95C64 88 34 92 10 103" fill="none" stroke="#eaffc0" stroke-opacity=".6" stroke-width="2" stroke-linecap="round"/>
     <path d="M80 80C62 68 38 70 18 90c22-10 42-14 62-10Z" fill="#fff" fill-opacity=".3"/>
+    <g fill="url(#i-drop)"><circle cx="38" cy="90" r="6.5"/><circle cx="62" cy="83" r="3.8"/></g>
+    <g fill="#fff"><circle cx="36" cy="88" r="1.7"/></g></g>
+    <g class="sp-leafR">
     <path d="M99 79C101 31 132 3 178 0c5 48-25 82-79 79Z" fill="url(#i-leafR)"/><path d="M99 79C130 72 160 46 178 0c5 48-25 82-79 79Z" fill="#14520c" fill-opacity=".3"/>
     <path d="M103 74C122 52 146 28 170 9" fill="none" stroke="#eaffc0" stroke-opacity=".6" stroke-width="2" stroke-linecap="round"/>
     <path d="M108 60C116 34 138 16 168 8c-24 10-44 28-60 52Z" fill="#fff" fill-opacity=".3"/>
-    <g fill="url(#i-drop)"><circle cx="38" cy="90" r="6.5"/><circle cx="62" cy="83" r="3.8"/><circle cx="132" cy="31" r="7.5"/><circle cx="153" cy="20" r="4.6"/><circle cx="120" cy="50" r="3.2"/></g>
-    <g fill="#fff"><circle cx="36" cy="88" r="1.7"/><circle cx="130" cy="28.5" r="2"/><circle cx="152" cy="18.8" r="1.2"/></g>
-    <path d="M34 58l2.2 7.3 7.3 2.2-7.3 2.2L34 77l-2.2-7.3-7.3-2.2 7.3-2.2Z" fill="#fff"/>
+    <g fill="url(#i-drop)"><circle cx="132" cy="31" r="7.5"/><circle cx="153" cy="20" r="4.6"/><circle cx="120" cy="50" r="3.2"/></g>
+    <g fill="#fff"><circle cx="130" cy="28.5" r="2"/><circle cx="152" cy="18.8" r="1.2"/></g></g>
+    <path class="sp-star" d="M34 58l2.2 7.3 7.3 2.2-7.3 2.2L34 77l-2.2-7.3-7.3-2.2 7.3-2.2Z" fill="#fff"/>
   </svg>`
 };
 const ICON_DEFS = `<svg id="icon-defs" width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs>
@@ -1258,7 +1515,7 @@ function toast(msg, type = 'info', { duration = 3000, action } = {}) {
   root.innerHTML = '';
   const t = document.createElement('div');
   t.className = 'toast ' + type;
-  t.innerHTML = `<span>${esc(msg)}</span>${action ? `<button type="button">${esc(action.label)}</button>` : ''}`;
+  t.innerHTML = `<span>${esc(msg)}</span>${action ? `<button type="button">${esc(action.label)}</button><i class="toast-bar" style="animation-duration:${duration}ms"></i>` : ''}`;
   if (action) t.querySelector('button').addEventListener('click', () => { t.remove(); action.fn(); });
   root.appendChild(t);
   toastTimer = setTimeout(() => t.remove(), duration);
@@ -1271,6 +1528,7 @@ function openSheet({ title, body, onMount }) {
   wrap.innerHTML = `<div class="sheet" role="dialog" aria-modal="true" aria-label="${esc(title || '')}">
     <div class="sheet-grab"></div>${title ? `<h3 class="sheet-title">${esc(title)}</h3>` : ''}${body}</div>`;
   $('#modal-root').appendChild(wrap);
+  [...$('.sheet', wrap).children].forEach((c, i) => c.style.setProperty('--i', i));
   const prevFocus = document.activeElement;
   let closed = false;
   const onKey = e => { if (e.key === 'Escape') close(); };
@@ -1737,6 +1995,7 @@ const Act = {
     const now = Date.now();
     const patch = { status, statusChangedAt: now, updatedAt: now };
     if (status === 'active') patch.activeOrder = Data.maxActiveOrder() + 1;
+    FX.hint(id, status);
     Store.put('items', id, patch);
     undoToast(msg(it), () => Store.put('items', id, prev, { replace: true }));
   },
@@ -1842,6 +2101,234 @@ const NotesSaver = (() => {
 /* ==========================================================================
    7. App-Zustand & Rendern
    ========================================================================== */
+/* ==========================================================================
+   7b. Animationen (FX): Gleiten, Davonfliegen, Konfetti, Lichtwellen, Intro
+   Alles über die Web Animations API – bei „Bewegung reduzieren“ aus.
+   ========================================================================== */
+const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+const FX = (() => {
+  const ok = () => !reduceMotion.matches && typeof Element.prototype.animate === 'function';
+  const layer = () => $('#fx');
+  const TAB_ORDER = ['start', 'ordner', 'mehr'];
+  const COLORS_FX = ['#c8ff6a', '#7fe8ff', '#ffffff', '#ffe36e', '#c9a0ff', '#6fffc4'];
+  const SPRING = 'cubic-bezier(.34,1.56,.64,1)';
+  const SMOOTH = 'cubic-bezier(.2,.9,.3,1)';
+  let lastTap = { x: innerWidth / 2, y: innerHeight / 2 };
+  const hints = new Map(); // flip-Schlüssel → wohin die Karte fliegt
+
+  document.addEventListener('pointerdown', e => {
+    lastTap = { x: e.clientX, y: e.clientY };
+    if (!ok()) return;
+    // Lichtwelle auf Glas-Knöpfen
+    const host = e.target.closest && e.target.closest('.btn, .tab-btn, .folder-tab-btn, .panel-toggle, .seg button, .folder-new');
+    if (!host || host.disabled) return;
+    const r = host.getBoundingClientRect();
+    const s = Math.max(r.width, r.height) * 2.2;
+    const rp = document.createElement('span');
+    rp.className = 'ripple';
+    rp.style.cssText = `width:${s}px;height:${s}px;left:${e.clientX - r.left - s / 2}px;top:${e.clientY - r.top - s / 2}px`;
+    host.appendChild(rp);
+    rp.animate([{ transform: 'scale(0)', opacity: .55 }, { transform: 'scale(1)', opacity: 0 }], { duration: 650, easing: SMOOTH }).onfinish = () => rp.remove();
+  }, true);
+
+  /** Elemente einer Ansicht nacheinander hereinkommen lassen */
+  function collect(root) {
+    const out = [];
+    for (const el of root.children) {
+      if (el.id === 'cabinet') out.push(...collect(el));
+      else if (el.matches('.list, .cabinet')) out.push(...el.children);
+      else out.push(el);
+    }
+    return out;
+  }
+  function enter(root, { dx = 0, dy = 18, base = 0, step = 50 } = {}) {
+    if (!ok()) return;
+    collect(root).forEach((el, i) => {
+      el.animate([
+        { opacity: 0, transform: `translate(${dx}px, ${dy}px) scale(.96)` },
+        { opacity: 1, transform: 'none' }
+      ], { duration: 560, delay: base + Math.min(i, 10) * step, easing: 'cubic-bezier(.2,.9,.25,1.12)', fill: 'backwards' });
+    });
+  }
+  /** Tab-Wechsel: Inhalt gleitet aus der passenden Richtung herein, Titel mit */
+  function enterTab(view, from, to) {
+    const dir = TAB_ORDER.indexOf(to) >= TAB_ORDER.indexOf(from) ? 1 : -1;
+    enter(view, { dx: 34 * dir, dy: 6, step: 40 });
+    if (!ok()) return;
+    $('#title').animate([{ opacity: 0, transform: `translateX(${24 * dir}px)` }, { opacity: 1, transform: 'none' }], { duration: 450, easing: SMOOTH });
+  }
+
+  /* ---------- FLIP: Karten gleiten an ihren neuen Platz ---------- */
+  function snap() {
+    const m = new Map();
+    $$('#view [data-flip]').forEach(el => {
+      const hidden = !!el.closest('.folder:not(.open)');
+      m.set(el.dataset.flip, { el, r: el.getBoundingClientRect(), paper: !!el.closest('.folder-inner'), hidden });
+    });
+    return m;
+  }
+  function flip(before) {
+    if (!before) return;
+    if (!ok()) { hints.clear(); return; }
+    const seen = new Set();
+    $$('#view [data-flip]').forEach(el => {
+      const k = el.dataset.flip;
+      seen.add(k);
+      if (el.closest('.folder:not(.open)')) return;
+      const b = before.get(k);
+      const r = el.getBoundingClientRect();
+      if (!b) {
+        el.animate([{ opacity: 0, transform: 'scale(.88) translateY(14px)' }, { opacity: 1, transform: 'none' }], { duration: 520, easing: SPRING });
+        return;
+      }
+      if (b.hidden) return;
+      const dx = b.r.left - r.left, dy = b.r.top - r.top;
+      if (Math.abs(dx) > 1 || Math.abs(dy) > 1) {
+        el.animate([{ transform: `translate(${dx}px, ${dy}px)` }, { transform: 'none' }], { duration: 480, easing: SMOOTH });
+      }
+      if (el.matches('.card') && Math.abs(b.r.height - r.height) > 2) {
+        const prev = el.style.overflow;
+        el.style.overflow = 'hidden';
+        const a = el.animate([{ height: b.r.height + 'px' }, { height: r.height + 'px' }], { duration: 420, easing: SMOOTH });
+        a.onfinish = a.oncancel = () => { el.style.overflow = prev; };
+      }
+    });
+    before.forEach((b, k) => { if (!seen.has(k) && !b.hidden && b.el.matches('.card')) ghost(b, hints.get(k) || {}); });
+    hints.clear();
+  }
+  /** Weggefallene Karte als „Geist“ wegfliegen lassen – zum Ziel-Tab, in die Pause-Sektion oder nach unten weg */
+  function ghost(b, hint) {
+    const { el, r } = b;
+    const wrap = document.createElement('div');
+    wrap.className = 'ghost' + (b.paper ? ' folder-inner' : '');
+    wrap.style.cssText = `left:${r.left}px;top:${r.top}px;width:${r.width}px;height:${r.height}px`;
+    wrap.appendChild(el);
+    layer().appendChild(wrap);
+    let frames, opts;
+    const target = hint.to ? $(`.tab-btn[data-tab="${hint.to}"] .ico`) : hint.toEl ? $(hint.toEl) : null;
+    const tr = target && target.getBoundingClientRect();
+    if (tr && tr.width) {
+      const dx = tr.left + tr.width / 2 - (r.left + r.width / 2);
+      const dy = tr.top + tr.height / 2 - (r.top + r.height / 2);
+      frames = [
+        { transform: 'none', opacity: 1 },
+        { transform: `translate(${dx * .2}px, ${dy * .2 - 46}px) scale(.66) rotate(-5deg)`, opacity: 1, offset: .32 },
+        { transform: `translate(${dx}px, ${dy}px) scale(.05) rotate(10deg)`, opacity: .25 }
+      ];
+      opts = { duration: 860, easing: 'cubic-bezier(.45,0,.25,1)', fill: 'forwards' };
+    } else if (hint.kind === 'discard') {
+      frames = [{ transform: 'none', opacity: 1 }, { transform: 'translateY(-10px) rotate(-2deg)', opacity: 1, offset: .25 }, { transform: 'translateY(90px) rotate(9deg) scale(.82)', opacity: 0 }];
+      opts = { duration: 620, easing: 'cubic-bezier(.5,0,.75,0)', fill: 'forwards' };
+    } else {
+      frames = [{ transform: 'none', opacity: 1 }, { transform: 'scale(.88)', opacity: 0 }];
+      opts = { duration: 340, easing: 'ease-in', fill: 'forwards' };
+    }
+    const a = wrap.animate(frames, opts);
+    a.onfinish = () => {
+      wrap.remove();
+      if (hint.to) bounceTab(hint.to);
+      else if (hint.toEl && target) pop(target);
+    };
+  }
+  /** Ziel für die nächste weggefallene Karte merken (vor dem Statuswechsel aufrufen) */
+  function hint(id, status) {
+    const k = 'card-' + id;
+    const H = {
+      learned: { to: 'ordner' },
+      active: { to: 'start' },
+      idea: { to: 'ordner' },
+      paused: { toEl: '[data-flip="paused"]' },
+      discarded: { kind: 'discard' }
+    };
+    if (H[status]) hints.set(k, H[status]);
+    if (status === 'learned') burst(lastTap.x, lastTap.y, { big: true });
+    else if (status === 'active') burst(lastTap.x, lastTap.y);
+  }
+
+  /* ---------- Konfetti / Sterne / Blasen ---------- */
+  function burst(x, y, { n = 18, spread = 110, big = false } = {}) {
+    if (!ok()) return;
+    if (big) { n = 36; spread = 175; ring(x, y); }
+    for (let i = 0; i < n; i++) {
+      const p = document.createElement('span');
+      const kind = Math.random();
+      p.className = 'pt ' + (kind < .38 ? 'star' : kind < .7 ? 'bub' : 'dot');
+      const s = (kind < .38 ? 11 : kind < .7 ? 8 : 4) + Math.random() * (big ? 9 : 5);
+      p.style.cssText = `left:${x}px;top:${y}px;width:${s}px;height:${s}px;--c:${COLORS_FX[i % COLORS_FX.length]}`;
+      layer().appendChild(p);
+      const ang = Math.random() * Math.PI * 2, dist = spread * (.35 + Math.random() * .65);
+      const tx = Math.cos(ang) * dist, ty = Math.sin(ang) * dist;
+      p.animate([
+        { transform: 'translate(-50%,-50%) scale(.2)', opacity: 1 },
+        { transform: `translate(calc(-50% + ${tx * .72}px), calc(-50% + ${ty * .72}px)) scale(1) rotate(${Math.random() * 180}deg)`, opacity: 1, offset: .42 },
+        { transform: `translate(calc(-50% + ${tx}px), calc(-50% + ${ty + 60}px)) scale(.15) rotate(${Math.random() * 360}deg)`, opacity: 0 }
+      ], { duration: 800 + Math.random() * 500, easing: 'cubic-bezier(.2,.8,.3,1)' }).onfinish = () => p.remove();
+    }
+  }
+  function ring(x, y) {
+    const r = document.createElement('span');
+    r.className = 'pt-ring';
+    r.style.cssText = `left:${x}px;top:${y}px`;
+    layer().appendChild(r);
+    r.animate([{ transform: 'translate(-50%,-50%) scale(.2)', opacity: .95 }, { transform: 'translate(-50%,-50%) scale(3.4)', opacity: 0 }], { duration: 750, easing: SMOOTH }).onfinish = () => r.remove();
+  }
+  function pop(el) {
+    if (!ok() || !el) return;
+    el.animate([{ transform: 'scale(1)' }, { transform: 'scale(1.12)' }, { transform: 'scale(1)' }], { duration: 420, easing: SPRING });
+  }
+  /** Tab-Icon wackelt wie Gelee und funkelt */
+  function bounceTab(tab) {
+    const ic = $(`.tab-btn[data-tab="${tab}"] .ico`);
+    if (!ic || !ok()) return;
+    ic.animate([
+      { transform: 'scale(1)' }, { transform: 'scale(1.38, .74)' }, { transform: 'scale(.84, 1.22)' },
+      { transform: 'scale(1.1, .92)' }, { transform: 'scale(.97, 1.03)' }, { transform: 'scale(1)' }
+    ], { duration: 700, easing: 'ease-out' });
+    const r = ic.getBoundingClientRect();
+    burst(r.left + r.width / 2, r.top + r.height / 2, { n: 12, spread: 62 });
+  }
+  /** Leuchtkugel fliegt vom Erfassen zum Ziel-Tab */
+  function fly(from, tab) {
+    const t = $(`.tab-btn[data-tab="${tab}"] .ico`);
+    if (!t || !ok()) return;
+    const tr = t.getBoundingClientRect();
+    const o = document.createElement('span');
+    o.className = 'orb';
+    o.style.cssText = `left:${from.x}px;top:${from.y}px`;
+    layer().appendChild(o);
+    const dx = tr.left + tr.width / 2 - from.x, dy = tr.top + tr.height / 2 - from.y;
+    o.animate([
+      { transform: 'translate(-50%,-50%) scale(.3)', opacity: 0 },
+      { transform: `translate(calc(-50% + ${dx * .3}px), calc(-50% + ${dy * .3 - 80}px)) scale(1.15)`, opacity: 1, offset: .35 },
+      { transform: `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px)) scale(.35)`, opacity: .7 }
+    ], { duration: 820, easing: 'cubic-bezier(.45,0,.25,1)' }).onfinish = () => { o.remove(); bounceTab(tab); };
+  }
+
+  /* ---------- Intro beim Start ---------- */
+  function intro() {
+    const base = ok() ? 640 : 0;
+    if (ok()) {
+      const s = document.createElement('div');
+      s.id = 'splash';
+      s.innerHTML = '<img src="icon-512.png" alt="">';
+      document.body.appendChild(s);
+      setTimeout(() => { s.classList.add('out'); setTimeout(() => s.remove(), 520); }, 620);
+      $('#title').animate([{ opacity: 0, transform: 'translateY(-14px)' }, { opacity: 1, transform: 'none' }], { duration: 600, delay: base, easing: SMOOTH, fill: 'backwards' });
+      $('.tabbar-inner').animate([{ transform: 'translateY(140%)' }, { transform: 'none' }], { duration: 750, delay: base + 120, easing: SPRING, fill: 'backwards' });
+      $('#fab').animate([{ transform: 'scale(0) rotate(-120deg)' }, { transform: 'none' }], { duration: 700, delay: base + 380, easing: SPRING, fill: 'backwards' });
+    }
+    enter($('#view'), { base: base + 80 });
+  }
+
+  /** Gleitendes Glas-Leuchten in der Tab-Leiste */
+  function moveTabGlow(tab) {
+    const inner = $('.tabbar-inner');
+    if (inner) inner.style.setProperty('--tab-i', TAB_ORDER.indexOf(tab));
+  }
+
+  return { snap, flip, enter, enterTab, hint, burst, bounceTab, fly, intro, moveTabGlow, pop, ok, lastTap: () => lastTap };
+})();
+
 const App = {
   tab: 'start',
   openItem: null,       // aufgeklappte Karte
@@ -1880,8 +2367,12 @@ document.addEventListener('focusout', () => {
 function render() {
   renderPending = false;
   const view = $('#view');
-  if (App.renderedTab !== App.tab) {
+  const prevTab = App.renderedTab;
+  const tabChanged = prevTab !== App.tab;
+  const before = tabChanged ? null : FX.snap();
+  if (tabChanged) {
     view.innerHTML = '';
+    view._key = null;
     App.renderedTab = App.tab;
     window.scrollTo(0, 0);
   }
@@ -1893,7 +2384,18 @@ function render() {
     if (on) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current');
   });
   $('#fab').hidden = App.tab === 'mehr';
+  FX.moveTabGlow(App.tab);
   ({ start: viewStart, ordner: viewOrdner, mehr: viewMehr })[App.tab](view);
+  if (tabChanged) { if (prevTab) FX.enterTab(view, prevTab, App.tab); }
+  else FX.flip(before);
+}
+
+/** DOM nur ersetzen, wenn sich das HTML geändert hat – laufende Animationen bleiben ungestört */
+function setHTML(el, html, key = html) {
+  if (el._key === key) return false;
+  el.innerHTML = html;
+  el._key = key;
+  return true;
 }
 
 /* ---------- Karten ---------- */
@@ -1904,12 +2406,12 @@ const STATUS_BUTTONS = {
   learned: [['relearn', '🔁 Nochmal lernen', true]]
 };
 
-function cardHTML(it, { chip = true, handle = false } = {}) {
+function cardHTML(it, { chip = true, handle = false, i = 0 } = {}) {
   const open = App.openItem === it.id;
   const meta = [];
   if (chip) meta.push(chipHTML(Data.origin(it)));
   if (it.status === 'learned') meta.push(`<span>gelernt am ${fmtTs(it.statusChangedAt)}</span>`);
-  return `<article class="card ${open ? 'open' : ''}" data-id="${it.id}">
+  return `<article class="card ${open ? 'open' : ''}" data-id="${it.id}" data-flip="card-${it.id}" style="--i:${i}">
     <div class="card-head" data-action="toggle-card" data-id="${it.id}" role="button" tabindex="0" aria-expanded="${open}">
       ${handle ? '<span class="handle" aria-label="Zum Umsortieren ziehen" title="Ziehen zum Umsortieren">⋮⋮</span>' : ''}
       <div class="card-main">
@@ -1978,20 +2480,21 @@ function viewStart(view) {
   const act = Data.active();
   const pau = Data.paused();
   let h = '';
+  const grow = !(view._key || '').includes('empty-state');
   document.body.classList.toggle('start-empty', !act.length);
   if (!act.length) {
-    h += `<div class="empty-state"><div class="specks" aria-hidden="true">${SPECKS}</div>${ICON.sprout}<p>Du lernst gerade nichts.</p>
+    h += `<div class="empty-state __GROW__"><div class="specks" aria-hidden="true">${SPECKS}</div>${ICON.sprout}<p>Du lernst gerade nichts.</p>
       <button class="btn primary" data-action="goto-ordner">${ICON.glassFolder}Schau in deine Ideen</button></div>`;
   } else {
-    h += `<h2 class="sec-title">Gerade am Lernen</h2>
+    h += `<h2 class="sec-title" data-flip="sec-active">Gerade am Lernen</h2>
       <div class="list" data-list="active">${act.map(it => cardHTML(it, { handle: act.length > 1 })).join('')}</div>`;
   }
   if (pau.length) {
-    h += `<button class="sec-toggle ${App.pausedOpen ? 'open' : ''}" data-action="toggle-paused" aria-expanded="${App.pausedOpen}">
+    h += `<button class="sec-toggle ${App.pausedOpen ? 'open' : ''}" data-flip="paused" data-action="toggle-paused" aria-expanded="${App.pausedOpen}">
       ⏸️ Pausiert (${pau.length})<span class="chev" aria-hidden="true">›</span></button>`;
     if (App.pausedOpen) h += `<div class="list">${pau.map(it => cardHTML(it)).join('')}</div>`;
   }
-  view.innerHTML = h;
+  setHTML(view, h.replace('__GROW__', grow ? 'grow' : ''), h);
 }
 
 /* ---------- Tab: Ordner (Hängeregister) ---------- */
@@ -2013,34 +2516,37 @@ function renderCabinet() {
   const q = App.query.trim().toLowerCase();
   if (q) {
     const res = Data.items('idea').filter(i => i.title.toLowerCase().includes(q)).sort(byNewest);
-    box.innerHTML = res.length
+    setHTML(box, res.length
       ? `<div class="list">${res.map(it => cardHTML(it)).join('')}</div>`
-      : '<p class="empty-small">Keine Idee gefunden.</p>';
+      : '<p class="empty-small">Keine Idee gefunden.</p>');
     return;
   }
   const folders = [FIXED[LEARNED], FIXED[UNSORTED], ...Data.folders()];
-  box.innerHTML = `<div class="cabinet">${folders.map((f, i) => {
+  const counts = App.counts || (App.counts = {});
+  setHTML(box, `<div class="cabinet">${folders.map((f, i) => {
     const items = f.id === LEARNED ? Data.learned() : Data.ideasIn(f.id);
+    const bump = counts[f.id] !== undefined && counts[f.id] !== items.length;
+    counts[f.id] = items.length;
     const hex = COLOR[f.color] || COLOR.grau;
     const fg = fgFor(hex);
     const ts = fg === '#ffffff' ? '0 1px 2px rgba(0,0,0,.35)' : '0 1px 0 rgba(255,255,255,.55)';
     const off = (i % 3) * 24;
     const last = i === folders.length - 1;
-    return `<section class="folder ${App.openFolder === f.id ? 'open' : ''} ${off ? '' : 'off0'} ${last ? 'last' : ''}" data-folder="${f.id}"
+    return `<section class="folder ${App.openFolder === f.id ? 'open' : ''} ${off ? '' : 'off0'} ${last ? 'last' : ''}" data-folder="${f.id}" data-flip="folder-${f.id}"
         style="--fc:${hex};--fc-fg:${fg};--fc-ts:${ts};--off:${off}%">
       <div class="folder-tab">
         <button class="folder-tab-btn" data-action="toggle-folder" data-id="${f.id}" aria-expanded="${App.openFolder === f.id}">
-          ${f.icon ? `<span class="emo">${ICON[f.icon]}</span>` : f.emoji ? `<span class="emo">${esc(f.emoji)}</span>` : ''}<span class="name">${esc(f.name)}</span><span class="count">${items.length}</span>
+          ${f.icon ? `<span class="emo">${ICON[f.icon]}</span>` : f.emoji ? `<span class="emo">${esc(f.emoji)}</span>` : ''}<span class="name">${esc(f.name)}</span><span class="count ${bump ? 'bump' : ''}">${items.length}</span>
         </button>
         ${f.fixed ? '' : `<button class="folder-more" data-action="folder-menu" data-id="${f.id}" aria-label="Ordner bearbeiten">⋯</button>`}
       </div>
       <div class="folder-front"><span class="spark" style="--d:${(3.2 + (i % 4) * .6).toFixed(1)}s;--delay:-${(i * 1.3).toFixed(1)}s" aria-hidden="true"></span><div class="folder-wrap"><div class="folder-content"><div class="folder-inner">
-        ${items.map(it => cardHTML(it, { chip: f.id === LEARNED })).join('')}
+        ${items.map((it, k) => cardHTML(it, { chip: f.id === LEARNED, i: k })).join('')}
       </div></div></div></div>
     </section>`;
   }).join('')}
-    <button class="folder-new" data-action="new-folder">+ Neuer Ordner</button>
-  </div>`;
+    <button class="folder-new" data-flip="newfolder" data-action="new-folder">+ Neuer Ordner</button>
+  </div>`);
 }
 
 /* ---------- Tab: Mehr ---------- */
@@ -2069,7 +2575,8 @@ function viewMehr(view) {
   }
   const dis = Data.discarded();
   const theme = Store.settings().theme;
-  view.innerHTML = `
+  const segIdx = ['light', 'dark', 'auto'].indexOf(theme);
+  const changed = setHTML(view, `
     <section class="panel"><h2>Konto</h2>${acct}</section>
     <section class="panel p-verw">
       <button class="panel-toggle ${App.discardedOpen ? 'open' : ''}" data-action="toggle-discarded" aria-expanded="${App.discardedOpen}">
@@ -2090,12 +2597,16 @@ function viewMehr(view) {
       <input type="file" id="import-file" accept="application/json,.json" hidden>
     </section>
     <section class="panel"><h2>Darstellung</h2>
-      <div class="seg" role="radiogroup" aria-label="Darstellung">
+      <div class="seg" role="radiogroup" aria-label="Darstellung"><span class="seg-pill" style="--seg-i:${App.segI ?? segIdx}"></span>
         ${[['light', 'Hell'], ['dark', 'Dunkel'], ['auto', 'Automatisch']].map(([k, l]) =>
           `<button class="${theme === k ? 'on' : ''}" data-action="theme" data-theme="${k}" role="radio" aria-checked="${theme === k}">${l}</button>`).join('')}
       </div>
     </section>
-    <p class="about"><img src="icon-192.png" alt="">Lifeio ${APP_VERSION}</p>`;
+    <p class="about"><img src="icon-192.png" alt="">Lifeio ${APP_VERSION}</p>`);
+  if (!changed) return;
+  // Pille gleitet von der alten zur neuen Auswahl
+  App.segI = segIdx;
+  setTimeout(() => { const p = $('.seg-pill', view); if (p) p.style.setProperty('--seg-i', segIdx); }, 30);
 }
 
 /* ==========================================================================
@@ -2124,8 +2635,11 @@ function openCapture() {
         if (!t) { title.focus(); return; }
         const folderId = $('#cap-folder', sheet).value;
         const active = $('#cap-active', sheet).checked;
+        const fr = $('#cap-title', sheet).getBoundingClientRect();
         Act.create({ title: t, folderId, active });
         close();
+        const dest = active ? 'start' : 'ordner';
+        if (dest !== App.tab) FX.fly({ x: fr.left + fr.width / 2, y: fr.top + fr.height / 2 }, dest);
         const f = Data.folder(folderId);
         if (active) toast(`🔥 „${t}“ ist jetzt auf Start`);
         else {
@@ -2303,9 +2817,14 @@ const Actions = {
     App.tab = t;
     App.editingNotes = null;
     render();
+    FX.bounceTab(t);
   },
   'goto-ordner'() { App.tab = 'ordner'; render(); },
-  capture() { openCapture(); },
+  capture() {
+    const f = $('#fab');
+    f.classList.remove('spin'); void f.offsetWidth; f.classList.add('spin');
+    openCapture();
+  },
   'toggle-card'(el) {
     const id = el.dataset.id;
     App.openItem = App.openItem === id ? null : id;
@@ -2348,6 +2867,11 @@ const Actions = {
     // Klassen direkt umschalten (nicht neu zeichnen) → Ordner gleiten auf/zu, die dahinter rutschen nach
     $$('#cabinet .folder').forEach(s => {
       const on = s.dataset.folder === App.openFolder;
+      if (on && !s.classList.contains('open')) {
+        s.classList.add('just-opened');
+        clearTimeout(s._jo);
+        s._jo = setTimeout(() => s.classList.remove('just-opened'), 1400);
+      }
       s.classList.toggle('open', on);
       $('.folder-tab-btn', s).setAttribute('aria-expanded', on);
     });
@@ -2489,9 +3013,10 @@ document.addEventListener('pointerdown', e => {
     handle.removeEventListener('pointermove', onMove);
     handle.removeEventListener('pointerup', onUp);
     handle.removeEventListener('pointercancel', onUp);
-    cards.forEach(el => { el.style.transform = ''; });
     card.classList.remove('dragging');
     list.classList.remove('drag-active');
+    // bei Umsortierung Transforms stehen lassen: render() misst sie und lässt die Karte weich einrasten
+    if (target === idx) cards.forEach(el => { el.style.transform = ''; });
     if (target !== idx) {
       const ids = cards.map(c => c.dataset.id);
       const [m] = ids.splice(idx, 1);
@@ -2541,8 +3066,11 @@ function buildDecor() {
   const X = x => `calc(50% - 187.5px + ${x}px)`;
   const dots = [[228, 28, 3, .9], [263, 38, 2, .7], [284, 74, 2.5, .8], [326, 60, 2, .6], [357, 91, 3, .8], [241, 112, 2, .6], [311, 147, 2.5, .7], [350, 20, 2, .6], [300, 110, 1.5, .5], [196, 18, 2, .5]]
     .map(([x, y, s, o]) => `<span class="dot" style="--x:${X(x)};--y:${y}px;--s:${s}px;--o:${o}"></span>`).join('');
-  $('.bg').innerHTML = `<div class="halo"></div><div class="flare"></div><div class="arc a1"></div><div class="arc a2"></div><div class="ordner-dots">${dots}</div>`;
-  const drop = (tab, x, b, s, k = 1, r = 0) => `<span class="drop on-${tab}" style="--x:${X(x)};--b:${b}px;--s:${s}px;--k:${k};--r:${r}deg"></span>`;
+  const rises = [[8, 10, 24, -3], [22, 6, 19, -11], [37, 14, 31, -19], [52, 5, 17, -6], [66, 9, 27, -23], [79, 12, 22, -14], [92, 7, 29, -2]]
+    .map(([x, s, d, dl]) => `<span class="rise" style="--x:${x}%;--s:${s}px;--d:${d}s;--delay:${dl}s"></span>`).join('');
+  $('.tabbar-inner').insertAdjacentHTML('afterbegin', '<span class="tab-glow" aria-hidden="true"></span>');
+  $('.bg').innerHTML = `<div class="bgl bgl-start"></div><div class="bgl bgl-mehr"></div><div class="bgl bgl-ordner"></div>${rises}<div class="halo"></div><div class="flare"></div><div class="arc a1"></div><div class="arc a2"></div><div class="ordner-dots">${dots}</div>`;
+  const drop = (tab, x, b, s, k = 1, r = 0) => `<span class="drop on-${tab}" style="--x:${X(x)};--b:${b}px;--s:${s}px;--k:${k};--r:${r}deg;--w:${(4 + (x % 5) * .7).toFixed(1)}s"></span>`;
   $('.drops').innerHTML = [
     drop('start', 14, 202, 22), drop('start', 26, 146, 12), drop('start', 54, 124, 36, .74, -22), drop('start', 88, 168, 9),
     drop('start', 95, 83, 19), drop('start', 103, 4, 23), drop('start', 58, 255, 5), drop('start', 84, 285, 4),
@@ -2557,6 +3085,7 @@ function boot() {
   Store.subscribe(() => { applyTheme(); scheduleRender(); });
   Store.onSync(() => { if (App.tab === 'mehr') scheduleRender(); });
   render();
+  FX.intro();
   Auth.init();
   registerSW();
 }

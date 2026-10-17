@@ -303,6 +303,13 @@ Erst die App, dann das Design.
   Hintergrund je Tab eigen (Start: Aurora-Bögen über dem Spross, Mehr: Marine → Türkis, Ordner: grüner Schein
   unten links). Spross, Haus, Ordner, Zahnrad, Lupe, Papierkorb, Handy, Pfeile, Haken und Ablage sind eigene
   SVG-Grafiken (sehen auf jedem Gerät gleich aus). Ordner-Reiter mit schrägen Flanken.
+- **v1.3 – Animationen:** Intro (Logo ploppt auf, Oberfläche fliegt gestaffelt herein), gleitendes Glas-Leuchten
+  in der Tab-Leiste mit Gelee-Icons, Inhalte gleiten beim Tab-Wechsel aus der passenden Richtung herein,
+  Hintergrund überblendet weich. Karten gleiten an neue Plätze und klappen weich auf; erledigte Karten fliegen
+  zum Ziel-Tab (Gelernt mit Konfetti, Jetzt lernen mit Funken, Pausieren in die Pause-Sektion, Verwerfen kippt
+  weg). Spross wächst und wiegt sich, Aurora atmet, Blasen steigen, Tropfen wabbeln. Lichtwellen beim Antippen,
+  Glanz über lila Knöpfen, pulsierende „+“-Kugel, Leuchtkugel beim Erfassen, auffächernde Ordner-Blätter,
+  hüpfende Zahlen, federnde Sheets, Rückgängig-Zeitbalken. Bei „Bewegung reduzieren“ im System alles aus.
 - Bei „Bewegung reduzieren“ im System stehen alle Animationen still.
 
 ---
