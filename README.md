@@ -23,6 +23,8 @@ Ideen sammeln und verwalten, was du in deiner Freizeit lernst – als Single-Fil
 - **Lebenszyklus:** 💡 Idee → 🔥 Aktiv ⇄ ⏸️ Pausiert → ✅ Gelernt, jederzeit 🗑️ Verwerfen.
   Jeder Statuswechsel lässt sich rückgängig machen.
 - **Mehr:** Konto, Verworfen (wiederherstellen / endgültig löschen), Backup (JSON), Hell/Dunkel/Automatisch.
+- **Design:** Frutiger Aero – Glasflächen, glänzende Knöpfe und Ordner, Aurora-Hintergrund mit Blasen und
+  Funkeln. Dunkel = Ozean-Aurora, Hell = Himmel.
 
 ## Dateien
 
@@ -31,7 +33,10 @@ Ideen sammeln und verwalten, was du in deiner Freizeit lernst – als Single-Fil
 | `index.html` | komplette App |
 | `sw.js` | Service Worker (Offline-Cache) |
 | `manifest.json` | PWA-Manifest |
-| `icon-192.png`, `icon-512.png` | App-Icons (Platzhalter bis zur Design-Phase) |
+| `icon-192.png`, `icon-512.png` | App-Icons mit transparenten Ecken (Desktop, Android) |
+| `icon-maskable-512.png` | Android-Icon mit sicherem Rand (maskable) |
+| `apple-touch-icon.png` | iPhone-Homescreen-Icon (randlos, iOS rundet selbst ab) |
+| `favicon-64.png` | Browser-Tab-Icon |
 | `firestore.rules` | Firestore-Sicherheitsregeln |
 | `SPEC.md` | Spezifikation |
 

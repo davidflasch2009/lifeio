@@ -288,6 +288,23 @@ Erst die App, dann das Design.
   kommt **sofort**.
 - **Später (Design-Phase):** Glas, Glanz, 3D-Ordner, Hintergrund wie im Vorbild-Bild, Icons, ggf. weitere Designs.
 
+**Umgesetzt in v1.1 – Frutiger Aero:**
+
+- **Dunkel** (wie die Mockups): Ozean-Verlauf Blau → Petrol → Grün mit regenbogenfarbigen Aurora-Bögen,
+  Lichtstrahl, aufsteigenden Blasen und Funkeln. **Hell:** dieselbe Optik als heller Himmel.
+- Glasflächen (Karten, Panels, Suchleiste, Tab-Leiste) mit Weichzeichner, Lichtkante oben und Schimmer.
+- Glänzende „Aero“-Knöpfe: Lila (Hauptaktion), Blau (Backup), Rot (Löschen); „+“ als leuchtende Kugel.
+- Ordner als glänzende 3D-Mappen mit funkelnden Reitern; der vorderste Ordner zeigt seine ganze Vorderseite.
+  Karten im geöffneten Ordner sind helles „Papier“.
+- Schwebende Glas-Tab-Leiste, großer leuchtender Spross im leeren Start-Screen.
+- Logo: Glas-Ordner mit Zielscheibe (`icon-*.png`, `apple-touch-icon.png`).
+- **v1.2 – 1:1 nach Mockup:** Maße, Farben und Positionen aus dem Mockup vermessen (375 px Breite):
+  Titel 44 px, Panels Radius 19 px / Abstand 11 px, Tab-Leiste 86 px hoch und 13 px über dem Rand, „+“-Kugel 72 px.
+  Hintergrund je Tab eigen (Start: Aurora-Bögen über dem Spross, Mehr: Marine → Türkis, Ordner: grüner Schein
+  unten links). Spross, Haus, Ordner, Zahnrad, Lupe, Papierkorb, Handy, Pfeile, Haken und Ablage sind eigene
+  SVG-Grafiken (sehen auf jedem Gerät gleich aus). Ordner-Reiter mit schrägen Flanken.
+- Bei „Bewegung reduzieren“ im System stehen alle Animationen still.
+
 ---
 
 ## 13. Bewusst NICHT im ersten Build
