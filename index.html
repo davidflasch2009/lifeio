@@ -1429,21 +1429,27 @@ body[data-tab="start"] .bgl-start, body[data-tab="mehr"] .bgl-mehr, body[data-ta
 /* Intro: Logo glänzt auf */
 #splash {
   position: fixed;
-  inset: 0;
+  left: 0; right: 0; top: 0;
+  /* über den Home-Leisten-Bereich hinaus – iOS rechnet ihn beim ersten Laden nicht mit (sonst Streifen unten) */
+  bottom: calc(-1 * env(safe-area-inset-bottom, 0px) - 60px);
+  padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 60px);
   z-index: 200;
   display: grid;
   place-items: center;
   background: radial-gradient(60% 40% at 50% 45%, #0b5a78, #031d3c 70%);
-  transition: opacity .5s ease, transform .5s ease;
+  transition: opacity .5s ease;
 }
 #splash img {
   width: 132px; height: 132px;
   filter: drop-shadow(0 0 30px rgba(120, 230, 255, .65)) drop-shadow(0 10px 20px rgba(0, 10, 30, .5));
   animation: splashPop .5s cubic-bezier(.2, .9, .3, 1) both;
 }
-#splash.out { opacity: 0; transform: scale(1.03); pointer-events: none; }
+#splash.out { opacity: 0; pointer-events: none; }
 @keyframes splashPop { from { opacity: 0; transform: scale(.82); } to { opacity: 1; transform: none; } }
 html[data-theme="light"] #splash { background: radial-gradient(60% 40% at 50% 45%, #c6f1fb, #2aa7ee 75%); }
+@media (prefers-color-scheme: light) {
+  html:not([data-theme="dark"]) #splash { background: radial-gradient(60% 40% at 50% 45%, #c6f1fb, #2aa7ee 75%); }
+}
 
 @media (prefers-reduced-motion: reduce) {
   .bg *, .drops *, .sprout-wrap, .sprout-img, .speck, .spark, .fab, .fab::after, .btn.primary::after, .panel::after { animation: none !important; }
@@ -1492,7 +1498,7 @@ const FIREBASE_CONFIG = {
 /* ==========================================================================
    1. Konstanten & Helfer
    ========================================================================== */
-const APP_VERSION = '1.5.1';
+const APP_VERSION = '1.5.2';
 const LS = { data: 'lifeio-data', theme: 'lifeio-theme' };
 const CDN = {
   fbApp: 'https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js',
