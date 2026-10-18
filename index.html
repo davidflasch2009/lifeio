@@ -818,6 +818,49 @@ textarea.notes-edit { min-height: 92px; display: block; line-height: 26px; }
 .log { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 7px; }
 .log-entry { padding: 9px 13px; cursor: pointer; }
 .log-date { font-size: 12px; font-weight: 750; color: var(--text-dim); }
+.log-top { display: flex; align-items: center; gap: 8px; min-height: 22px; }
+.log-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: auto;
+  height: 22px;
+  padding: 0 9px 0 7px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 750;
+  white-space: nowrap;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .3);
+}
+.log-badge svg { width: 13px; height: 13px; }
+.log-badge.dur { color: var(--text); background: rgba(110, 215, 255, .2); border: 1px solid rgba(130, 225, 255, .55); }
+.log-badge.ms { color: var(--text); background: rgba(255, 210, 80, .22); border: 1px solid rgba(255, 215, 110, .65); }
+.timeline .log-entry.ms .log-text { font-weight: 700; }
+.timeline .log-entry.ms::before {
+  left: -20px; top: 11px;
+  width: 13px; height: 13px;
+  background: radial-gradient(circle at 35% 30%, #fff 0 20%, #ffe680 45%, #e59a12);
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, .55), 0 0 10px rgba(255, 210, 90, .9);
+}
+/* Eintrags-Popup: Art, Dauer, Schnellwahl */
+.seg.log-type { margin: 4px 0 2px; }
+.seg.two .seg-pill { width: calc((100% - 8px) / 2); }
+.log-type button { display: flex; align-items: center; justify-content: center; gap: 7px; font-size: 15.5px; }
+.log-type button svg { width: 18px; height: 18px; flex: none; }
+.dur-row { display: flex; align-items: center; gap: 12px; }
+.dur-row .input { width: 116px; text-align: center; font-size: 22px; font-weight: 750; padding: 9px 10px; }
+.dur-unit { color: var(--text-dim); font-weight: 650; }
+.dur-chips { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 10px; }
+.dur-chip { height: 32px; padding: 0 12px; font-size: 14px; }
+.dur-chip.on {
+  color: #fff;
+  text-shadow: 0 1px 1px rgba(60, 0, 120, .5);
+  border-color: rgba(240, 225, 255, .75);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, .5) 0%, rgba(255, 255, 255, .14) 48%, rgba(255, 255, 255, 0) 52%),
+    linear-gradient(180deg, #c487ff, #8a42ee);
+}
+.lt-session[hidden] { display: none; }
 .log-text { white-space: pre-wrap; overflow-wrap: anywhere; }
 
 /* Karten im Ordner: helles „Papier“ wie Blätter in einer Mappe */
@@ -1069,10 +1112,10 @@ textarea.notes-edit { min-height: 92px; display: block; line-height: 26px; }
   font-weight: 500;
   font-size: 15.5px;
   white-space: nowrap;
-  color: rgba(240, 250, 255, .9);
+  color: var(--text-dim);
 }
 .seg button.on {
-  color: #fff;
+  color: var(--text);
   font-weight: 600;
   border-color: rgba(255, 255, 255, .7);
   background:
@@ -1498,7 +1541,7 @@ const FIREBASE_CONFIG = {
 /* ==========================================================================
    1. Konstanten & Helfer
    ========================================================================== */
-const APP_VERSION = '1.5.2';
+const APP_VERSION = '1.6.0';
 const LS = { data: 'lifeio-data', theme: 'lifeio-theme' };
 const CDN = {
   fbApp: 'https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js',
@@ -1550,6 +1593,13 @@ function fmtDay(iso) {
   if (!isISO(iso)) return '';
   const [y, m, d] = iso.split('-').map(Number);
   return `${WD[new Date(y, m - 1, d).getDay()]}, ${pad(d)}.${pad(m)}.${y}`;
+}
+/** Dauer lesbar: 25 min, 1 h, 1 h 30 min */
+function fmtMin(m) {
+  m = Math.round(m);
+  if (m < 60) return m + ' min';
+  const hh = Math.floor(m / 60), mm = m % 60;
+  return hh + ' h' + (mm ? ' ' + mm + ' min' : '');
 }
 function fmtTs(ms) {
   const d = new Date(ms || Date.now());
@@ -1661,6 +1711,8 @@ const ICON = {
   pencil: sq('i-teal', '<path d="M10 22.2l.9-4.1 9.3-9.3a1.6 1.6 0 0 1 2.3 0l.9.9a1.6 1.6 0 0 1 0 2.3l-9.3 9.3Z" fill="#fff"/><path d="M10 22.2l4.1-.9" stroke="#0f7f88" stroke-width="1.4"/>'),
   note: `<svg viewBox="0 0 32 32" aria-hidden="true"><rect x="5" y="3.5" width="22" height="25.5" rx="3.2" fill="url(#i-note)" stroke="#c9961a" stroke-width="1.2"/><rect x="5" y="3.5" width="22" height="5.5" rx="2.8" fill="#f3b632"/><path d="M9.5 13.5h13M9.5 18h13M9.5 22.5h8.5" stroke="#b47f0e" stroke-opacity=".55" stroke-width="1.7" stroke-linecap="round"/></svg>`,
   book: `<svg viewBox="0 0 32 32" aria-hidden="true"><path d="M5.5 6.6A2.6 2.6 0 0 1 8.1 4H26v21.5H8.1a2.6 2.6 0 0 0-2.6 2.6Z" fill="url(#i-book)"/><path d="M5.5 28.1a2.6 2.6 0 0 1 2.6-2.6H26v3H8.1a2.6 2.6 0 0 1-2.6-.4Z" fill="#f2ede1"/><path d="M5.8 6.6A2.6 2.6 0 0 1 8.1 4H26v6H5.8Z" fill="#fff" fill-opacity=".28"/><path d="M10.5 9.5h10M10.5 13.5h7.5" stroke="#fff" stroke-opacity=".75" stroke-width="1.7" stroke-linecap="round"/></svg>`,
+  timer: `<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="13.5" r="7.6" fill="none" stroke="currentColor" stroke-width="2.3"/><path d="M12 13.5V9.6M9.4 2.9h5.2M18.3 6.5l1.5-1.5" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"/></svg>`,
+  flag: `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 21.5V3.5" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"/><path d="M6.6 4.2c2.8-1.5 5.3 1.5 8.4 0 2.1-1 4-.6 4-.6v8.6s-1.2.8-3.7.8c-3.1 0-5.6-2.4-8.7-.9Z" fill="currentColor"/></svg>`,
   plus: `<svg viewBox="0 0 32 32" aria-hidden="true"><path d="M16 6.5v19M6.5 16h19" stroke="#fff" stroke-width="5" stroke-linecap="round"/></svg>`
 };
 const ICON_DEFS = `<svg id="icon-defs" width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs>
@@ -2641,8 +2693,13 @@ function cardBodyHTML(it) {
     </section>
     ${showLog ? `<section class="cb-sec">
       <h4>${ICON.book}<span>Logbuch</span><button class="btn small add-log" data-action="add-log" data-id="${it.id}">+ Eintrag</button></h4>
-      ${log.length ? `<ol class="timeline">${log.map(e => `<li class="log-entry" data-action="edit-log" data-id="${it.id}" data-log="${esc(e.id)}">
-          <div class="log-date">${fmtDay(e.date)}</div><div class="log-text">${linkify(e.text)}</div></li>`).join('')}</ol>`
+      ${log.length ? `<ol class="timeline">${log.map(e => {
+          const ms = e.type === 'milestone';
+          const badge = ms ? `<span class="log-badge ms">${ICON.flag}Meilenstein</span>`
+            : e.minutes ? `<span class="log-badge dur">${ICON.timer}${fmtMin(e.minutes)}</span>` : '';
+          return `<li class="log-entry ${ms ? 'ms' : ''}" data-action="edit-log" data-id="${it.id}" data-log="${esc(e.id)}">
+          <div class="log-top"><span class="log-date">${fmtDay(e.date)}</span>${badge}</div>${e.text ? `<div class="log-text">${linkify(e.text)}</div>` : ''}</li>`;
+        }).join('')}</ol>`
         : '<p class="cb-empty">Noch keine Einträge – halte fest, was du geübt hast.</p>'}
     </section>` : ''}
   </div>`;
@@ -2942,34 +2999,72 @@ function openRenameSheet(id) {
   });
 }
 
+const DUR_CHIPS = [15, 25, 30, 45, 60, 90];
 function openLogSheet(itemId, logId) {
   const it = Store.raw('items', itemId);
   if (!it) return;
   const entry = logId ? (it.log || []).find(e => e.id === logId) : null;
+  let type = entry && entry.type === 'milestone' ? 'milestone' : 'session';
+  const PH = { session: 'z. B. Akkorde C, G, Am geübt', milestone: 'z. B. Informationen beschaffen' };
+  const LBL = { session: 'Was hast du gemacht? (optional)', milestone: 'Meilenstein' };
   openSheet({
     title: entry ? 'Eintrag bearbeiten' : 'Neuer Logbuch-Eintrag',
-    body: `<label class="field"><span>Datum</span><input type="date" class="input" id="log-date" value="${esc(entry ? entry.date : todayISO())}"></label>
-      <label class="field"><span>Was hast du gemacht?</span><textarea class="input" id="log-text" rows="4" placeholder="z. B. Akkorde C, G, Am geübt">${esc(entry ? entry.text : '')}</textarea></label>
+    body: `<div class="seg two log-type" role="radiogroup" aria-label="Art des Eintrags"><span class="seg-pill" style="--seg-i:${type === 'milestone' ? 1 : 0}"></span>
+        <button type="button" data-type="session" role="radio" class="${type === 'session' ? 'on' : ''}" aria-checked="${type === 'session'}">${ICON.timer}Lerneinheit</button>
+        <button type="button" data-type="milestone" role="radio" class="${type === 'milestone' ? 'on' : ''}" aria-checked="${type === 'milestone'}">${ICON.flag}Meilenstein</button></div>
+      <div class="lt-session" ${type === 'milestone' ? 'hidden' : ''}>
+        <label class="field"><span>Dauer</span>
+          <div class="dur-row"><input type="number" class="input" id="log-min" inputmode="numeric" min="1" max="1440" placeholder="25" value="${entry && entry.minutes ? entry.minutes : ''}"><span class="dur-unit">Minuten</span></div></label>
+        <div class="dur-chips">${DUR_CHIPS.map(m => `<button type="button" class="pill dur-chip ${entry && entry.minutes === m ? 'on' : ''}" data-min="${m}">${fmtMin(m)}</button>`).join('')}</div>
+      </div>
+      <label class="field"><span id="log-text-lbl">${LBL[type]}</span><textarea class="input" id="log-text" rows="3" placeholder="${PH[type]}">${esc(entry ? entry.text : '')}</textarea></label>
+      <label class="field"><span>Datum</span><input type="date" class="input" id="log-date" value="${esc(entry ? entry.date : todayISO())}"></label>
       <div class="sheet-actions">
         ${entry ? '<button class="btn danger" data-k="del">Löschen</button>' : ''}<span class="grow"></span>
         <button class="btn" data-k="cancel">Abbrechen</button>
         <button class="btn primary" data-k="save">Speichern</button></div>`,
     onMount(sheet, close) {
       const text = $('#log-text', sheet);
-      if (!entry) text.focus();
+      const min = $('#log-min', sheet);
+      const setType = t => {
+        type = t;
+        $('.seg-pill', sheet).style.setProperty('--seg-i', t === 'milestone' ? 1 : 0);
+        $$('.log-type button', sheet).forEach(b => { const on = b.dataset.type === t; b.classList.toggle('on', on); b.setAttribute('aria-checked', on); });
+        $('.lt-session', sheet).hidden = t === 'milestone';
+        $('#log-text-lbl', sheet).textContent = LBL[t];
+        text.placeholder = PH[t];
+      };
+      $$('.log-type button', sheet).forEach(b => b.addEventListener('click', () => {
+        setType(b.dataset.type);
+        (type === 'milestone' ? text : min).focus();
+      }));
+      const markChip = () => $$('.dur-chip', sheet).forEach(c => c.classList.toggle('on', +c.dataset.min === +min.value));
+      $$('.dur-chip', sheet).forEach(c => c.addEventListener('click', () => { min.value = c.dataset.min; markChip(); }));
+      min.addEventListener('input', markChip);
+      if (!entry) (type === 'milestone' ? text : min).focus();
       const save = () => {
         const t = text.value.trim();
-        if (!t) { text.focus(); toast('Bitte etwas eintragen', 'warn'); return; }
+        let minutes = null;
+        if (type === 'milestone') {
+          if (!t) { text.focus(); toast('Bitte den Meilenstein benennen', 'warn'); return; }
+        } else {
+          minutes = parseInt(min.value, 10);
+          if (!(minutes > 0)) { min.focus(); toast('Bitte eine Dauer eingeben', 'warn'); return; }
+          minutes = Math.min(minutes, 1440);
+        }
         const d = $('#log-date', sheet).value;
         Act.saveLog(itemId, {
           id: entry ? entry.id : rid('l_'),
           date: isISO(d) ? d : todayISO(),
+          type,
+          minutes,
           text: t,
           createdAt: entry ? entry.createdAt : Date.now()
         });
         close();
       };
       text.addEventListener('keydown', e => { if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); save(); } });
+      min.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); save(); } });
       $('[data-k=save]', sheet).addEventListener('click', save);
       $('[data-k=cancel]', sheet).addEventListener('click', close);
       if (entry) $('[data-k=del]', sheet).addEventListener('click', () => { close(); Act.deleteLog(itemId, entry.id); });
@@ -3056,7 +3151,8 @@ async function importBackup(file) {
       ...i,
       status: STATUSES.includes(i.status) ? i.status : 'idea',
       notes: typeof i.notes === 'string' ? i.notes : '',
-      log: Array.isArray(i.log) ? i.log.filter(e => e && typeof e.text === 'string' && isISO(e.date)) : []
+      log: Array.isArray(i.log) ? i.log.filter(e => e && isISO(e.date) && (typeof e.text === 'string' || e.minutes > 0))
+        .map(e => ({ ...e, text: typeof e.text === 'string' ? e.text : '', type: e.type === 'milestone' ? 'milestone' : 'session', minutes: e.minutes > 0 ? Math.min(Math.round(e.minutes), 1440) : null })) : []
     }));
   const when = o.exportedAt ? ` vom ${fmtTs(Date.parse(o.exportedAt))}` : '';
   const ok = await confirmDialog({

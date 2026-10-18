@@ -135,7 +135,8 @@ Firestore unter `users/{uid}/…`. Im lokalen Modus liegt dieselbe Struktur als 
   "status": "idea",              // idea | active | paused | learned | discarded
   "notes": "Kanal X auf YouTube…\nhttps://…",
   "log": [
-    { "id": "l1", "date": "2026-10-17", "text": "Akkorde C, G, Am geübt", "createdAt": "<timestamp>" }
+    { "id": "l1", "date": "2026-10-17", "type": "session", "minutes": 25, "text": "Akkorde C, G, Am geübt", "createdAt": "<timestamp>" },
+    { "id": "l2", "date": "2026-10-18", "type": "milestone", "minutes": null, "text": "Informationen beschaffen", "createdAt": "<timestamp>" }
   ],
   "activeOrder": 2,              // Reihenfolge auf Start (nur aktiv relevant)
   "createdAt": "<timestamp>",
@@ -364,3 +365,8 @@ Bitte beim Gegenlesen prüfen, alles leicht änderbar:
 5. **Mehr:** Verworfen, Backup, Darstellung.
 6. **Firebase:** Login, Firestore-Sync, Übernahme lokaler Daten.
 7. **PWA:** `sw.js`, `manifest.json`, Platzhalter-Icons, README, Deploy auf GitHub Pages.
+- **v1.6 – Logbuch mit Lerneinheiten und Meilensteinen:** Beim Eintrag wählt man oben zwischen **Lerneinheit**
+  (Dauer in Minuten Pflicht, Schnellwahl 15/25/30/45/60/90 min, Text optional) und **Meilenstein** (Name Pflicht,
+  z. B. „Informationen beschaffen“). In der Zeitleiste: Lerneinheiten mit Stoppuhr-Abzeichen („25 min“, „1 h 30 min“),
+  Meilensteine mit goldenem Punkt und Flagge. Alte Einträge gelten als Lerneinheit ohne Dauer; Backups bleiben
+  kompatibel. Keine Gesamtzeit-Statistik (bewusst weggelassen).

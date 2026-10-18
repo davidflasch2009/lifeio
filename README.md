@@ -12,7 +12,8 @@ Ideen sammeln und verwalten, was du in deiner Freizeit lernst – als Single-Fil
 ## Funktionen
 
 - **Start:** alle Skills, die du gerade lernst, untereinander. Antippen klappt eine Karte auf
-  (Titel, Ursprungsordner, Status-Knöpfe, Notizzettel, Logbuch). Reihenfolge per Ziehgriff ⋮⋮ ändern.
+  (Ordner, Umbenennen, Aktions-Kacheln, Notizzettel, Logbuch mit Lerneinheiten samt Dauer und Meilensteinen).
+  Reihenfolge per Ziehgriff ⋮⋮ ändern.
   Darunter die zugeklappte Sektion **Pausiert**.
 - **Ordner:** Hängeregister mit farbigen Reitern. Reihenfolge: ✅ Gelernt → 📥 Unsortiert → eigene Ordner.
   Antippen öffnet einen Ordner, die Ordner dahinter rutschen nach unten. Eigene Ordner über
