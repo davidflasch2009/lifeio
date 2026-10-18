@@ -320,6 +320,11 @@ Erst die App, dann das Design.
   Aufgeklappte Karte neu gestaltet: Ordner-Pill + „Umbenennen“ (Popup), Aktions-Kacheln mit Icons
   (Pausieren, Gelernt, Zu Ideen, Verwerfen bzw. großes „Jetzt lernen“/„Weiterlernen“/„Nochmal lernen“),
   linierter Notizzettel, Logbuch als leuchtende Zeitleiste.
+- **v1.5.1 – Fehlerkorrekturen:** Ordner-Chip zeigt nur ein Symbol (Icon, Emoji oder Farbpunkt) als getönte
+  Pill – keine Überlappung mehr am iPhone. Karten öffnen sich nur noch per Tippen: Nach einem Statuswechsel,
+  Tab-Wechsel, Ordner öffnen/schließen und nach über 5 Minuten im Hintergrund sind sie zugeklappt.
+  Ordner-Auswahl mit 16 px Schrift (kein iOS-Zoom). Glas-Schleier unter der Statusleiste, damit beim Scrollen
+  nichts unter Uhr und Akku durchläuft.
 - Bei „Bewegung reduzieren“ im System stehen alle Animationen still.
 
 ---

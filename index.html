@@ -51,6 +51,7 @@
   --aurora-opacity: 1;
 
   --page-bg: #0c3a3d;
+  --sb-bg: rgba(3, 32, 64, .55);
   --cb-sec-bg: rgba(0, 25, 45, .2);
   --note-line: rgba(255, 255, 255, .09);
   --radius: 19px;
@@ -84,6 +85,7 @@ html[data-theme="light"] {
   --toast-bg: rgba(8, 60, 95, .9);
   --aurora-opacity: .55;
   --page-bg: #bdeeb6;
+  --sb-bg: rgba(40, 155, 225, .45);
   --cb-sec-bg: rgba(255, 255, 255, .32);
   --note-line: rgba(0, 90, 140, .1);
 }
@@ -115,6 +117,7 @@ html[data-theme="light"] {
     --toast-bg: rgba(8, 60, 95, .9);
     --aurora-opacity: .55;
     --page-bg: #bdeeb6;
+  --sb-bg: rgba(40, 155, 225, .45);
     --cb-sec-bg: rgba(255, 255, 255, .32);
     --note-line: rgba(0, 90, 140, .1);
   }
@@ -315,6 +318,19 @@ body[data-tab="ordner"] .arc { opacity: var(--aurora-opacity); }
 }
 body[data-tab="start"].start-empty .drop.on-start,
 body[data-tab="mehr"] .drop.on-mehr { opacity: .95; }
+/* Inhalte laufen beim Scrollen nicht mehr ungeschützt unter Uhr und Akku durch */
+.statusbar {
+  position: fixed;
+  left: 0; right: 0; top: 0;
+  height: calc(env(safe-area-inset-top, 0px) * 1.3);
+  z-index: 35;
+  pointer-events: none;
+  background: linear-gradient(180deg, var(--sb-bg) 0%, var(--sb-bg) 55%, transparent);
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
+  -webkit-mask: linear-gradient(180deg, #000 65%, transparent);
+  mask: linear-gradient(180deg, #000 65%, transparent);
+}
 .ordner-dots { position: absolute; inset: 0; opacity: 0; transition: opacity .4s; }
 body[data-tab="ordner"] .ordner-dots { opacity: 1; }
 /* Tropfen liegen auf der Tab-Leiste – eigene Ebene darüber */
@@ -546,9 +562,24 @@ input[type="date"].input { min-height: 46px; }
   margin-bottom: 6px;
 }
 
-.chip { display: inline-flex; align-items: center; gap: 6px; }
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 23px;
+  padding: 0 10px 0 7px;
+  border-radius: 999px;
+  font-size: 12.5px;
+  font-weight: 650;
+  color: var(--text);
+  background: color-mix(in srgb, var(--c) 26%, transparent);
+  border: 1px solid color-mix(in srgb, var(--c) 60%, transparent);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .25);
+}
+.chip .fm { display: inline-flex; align-items: center; font-size: 13px; line-height: 1; text-shadow: none; }
+.chip .fm svg { width: 15px; height: 15px; }
 .chip .dot {
-  width: 10px; height: 10px;
+  width: 9px; height: 9px;
   border-radius: 50%;
   background: radial-gradient(circle at 35% 30%, rgba(255, 255, 255, .8), transparent 45%), var(--c);
   box-shadow: 0 0 0 1px rgba(255, 255, 255, .6), 0 0 6px var(--c);
@@ -644,7 +675,16 @@ input[type="date"].input { min-height: 46px; }
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, .6), 0 2px 6px rgba(0, 25, 45, .15);
 }
 .pill svg { width: 20px; height: 20px; margin-left: -4px; }
-.folder-pill { padding-right: 30px; cursor: pointer; }
+.folder-pill {
+  padding-right: 30px;
+  cursor: pointer;
+  border-color: color-mix(in srgb, var(--c) 60%, rgba(255, 255, 255, .6));
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, .36) 0%, rgba(255, 255, 255, .1) 50%, rgba(255, 255, 255, .03) 52%, rgba(255, 255, 255, .1) 100%),
+    color-mix(in srgb, var(--c) 28%, transparent);
+}
+.folder-pill .fm { display: inline-flex; align-items: center; font-size: 17px; line-height: 1; text-shadow: none; }
+.folder-pill .fm svg { width: 20px; height: 20px; }
 .folder-pill .dot {
   width: 11px; height: 11px;
   flex: none;
@@ -661,6 +701,7 @@ input[type="date"].input { min-height: 46px; }
   background: none;
   color: inherit;
   font: inherit;
+  font-size: 16px;
   text-shadow: inherit;
   outline: none;
   cursor: pointer;
@@ -1414,6 +1455,7 @@ html[data-theme="light"] #splash { background: radial-gradient(60% 40% at 50% 45
 <div class="bg" aria-hidden="true"></div>
 <div class="drops" aria-hidden="true"></div>
 <div id="fx" aria-hidden="true"></div>
+<div class="statusbar" aria-hidden="true"></div>
 <div class="app" id="app">
   <header class="topbar"><h1 id="title">Start</h1></header>
   <main id="view"></main>
@@ -1450,7 +1492,7 @@ const FIREBASE_CONFIG = {
 /* ==========================================================================
    1. Konstanten & Helfer
    ========================================================================== */
-const APP_VERSION = '1.5.0';
+const APP_VERSION = '1.5.1';
 const LS = { data: 'lifeio-data', theme: 'lifeio-theme' };
 const CDN = {
   fbApp: 'https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js',
@@ -2110,7 +2152,9 @@ const Data = {
   maxActiveOrder: () => Math.max(0, ...Data.items('active').map(i => i.activeOrder || 0))
 };
 const folderLabel = f => `${f.emoji ? f.emoji + ' ' : ''}${f.name}`;
-const chipHTML = f => `<span class="chip" style="--c:${COLOR[f.color] || COLOR.grau}"><span class="dot"></span>${esc(folderLabel(f))}</span>`;
+/** ein Symbol pro Ordner: festes Icon, sonst Emoji, sonst Farbpunkt (nie beides – sonst überlappt es am iPhone) */
+const folderMark = f => f.icon ? `<span class="fm">${ICON[f.icon]}</span>` : f.emoji ? `<span class="fm">${esc(f.emoji)}</span>` : '<span class="dot"></span>';
+const chipHTML = f => `<span class="chip" style="--c:${COLOR[f.color] || COLOR.grau}">${folderMark(f)}<span>${esc(f.name)}</span></span>`;
 
 /* ==========================================================================
    6. Aktionen (Änderungen an Daten)
@@ -2133,6 +2177,8 @@ const Act = {
     const prev = clone(it);
     const now = Date.now();
     const patch = { status, statusChangedAt: now, updatedAt: now };
+    // die Karte wandert woanders hin → dort zugeklappt ankommen
+    if (App.openItem === id) { App.openItem = null; App.editingNotes = null; }
     if (status === 'active') patch.activeOrder = Data.maxActiveOrder() + 1;
     FX.hint(id, status);
     Store.put('items', id, patch);
@@ -2569,7 +2615,7 @@ function cardBodyHTML(it) {
   const st = it.status;
   const f = Data.origin(it);
   const folderOpts = [FIXED[UNSORTED], ...Data.folders()]
-    .map(x => `<option value="${x.id}" ${Data.originId(it) === x.id ? 'selected' : ''}>${esc(folderLabel(x))}</option>`).join('');
+    .map(x => `<option value="${x.id}" ${Data.originId(it) === x.id ? 'selected' : ''}>${esc(x.name)}</option>`).join('');
   const tiles = TILES[st] || [];
   const wide = tiles.some(t => t[3].includes('wide'));
   const log = [...(it.log || [])].sort((a, b) => (b.date || '').localeCompare(a.date || '') || (b.createdAt || 0) - (a.createdAt || 0));
@@ -2577,7 +2623,7 @@ function cardBodyHTML(it) {
   return `<div class="card-body">
     <div class="cb-meta">
       <label class="pill folder-pill" style="--c:${COLOR[f.color] || COLOR.grau}" title="${st === 'idea' ? 'Ordner' : 'Ursprungsordner'}">
-        <span class="dot"></span><select class="f-folder" data-id="${it.id}" aria-label="Ordner">${folderOpts}</select><span class="caret"></span></label>
+        ${folderMark(f)}<select class="f-folder" data-id="${it.id}" aria-label="Ordner">${folderOpts}</select><span class="caret"></span></label>
       <button class="pill" data-action="rename" data-id="${it.id}">${ICON.pencil}Umbenennen</button>
       <span class="since">${SINCE[st] || ''} ${fmtTs(st === 'idea' ? it.createdAt : it.statusChangedAt)}</span>
     </div>
@@ -3050,11 +3096,12 @@ const Actions = {
     const t = el.dataset.tab;
     if (t === App.tab) { window.scrollTo({ top: 0, behavior: 'smooth' }); return; }
     App.tab = t;
+    App.openItem = null;
     App.editingNotes = null;
     render();
     FX.bounceTab(t);
   },
-  'goto-ordner'() { App.tab = 'ordner'; render(); },
+  'goto-ordner'() { App.tab = 'ordner'; App.openItem = null; render(); },
   capture() {
     const f = $('#fab');
     f.classList.remove('spin'); void f.offsetWidth; f.classList.add('spin');
@@ -3100,6 +3147,8 @@ const Actions = {
   'toggle-discarded'() { App.discardedOpen = !App.discardedOpen; render(); },
   'toggle-folder'(el) {
     const id = el.dataset.id;
+    // offene Karte zuklappen, damit ein Ordner immer mit geschlossenen Karten aufgeht
+    if (App.openItem) { App.openItem = null; App.editingNotes = null; renderCabinet(); }
     App.openFolder = App.openFolder === id ? null : id;
     // Klassen direkt umschalten (nicht neu zeichnen) → Ordner gleiten auf/zu, die dahinter rutschen nach
     $$('#cabinet .folder').forEach(s => {
@@ -3269,7 +3318,15 @@ document.addEventListener('pointerdown', e => {
 
 /* Beim Verlassen nichts verlieren */
 function saveAll() { NotesSaver.flushAll(); Store.saveNow(); }
-document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') saveAll(); });
+let hiddenAt = 0;
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'hidden') { saveAll(); hiddenAt = Date.now(); return; }
+  if (hiddenAt && Date.now() - hiddenAt > 5 * 60 * 1000 && App.openItem && !isTyping()) {
+    App.openItem = null;
+    App.editingNotes = null;
+    render();
+  }
+});
 window.addEventListener('pagehide', saveAll);
 
 /* ==========================================================================
